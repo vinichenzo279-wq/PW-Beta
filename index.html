@@ -348,7 +348,7 @@
 <meta property="og:description" content="Pacwyn Solver">
 <!-- VERSION: bump this AND the matching v-number in the <h1><span> below on every patch, however
      small — see the longer note next to the <h1> for why this matters. -->
-<title>Pacwyn Solver v5.24.2</title>
+<title>Pacwyn Solver v5.25.1</title>
 <!-- ABOUT THIS APP / DATA SOURCE:
      This tool is for PACWYN, a game that heavily parallels EA FC but is NOT FC — it uses FC's
      real player cards as a base and adds its own exclusive cards on top. That's why FC data is a
@@ -599,6 +599,12 @@ details.hlp p{font-size:12px;color:var(--mut);margin:8px 0 0;line-height:1.55}
 .rtg-model-score b{display:block;color:var(--ink);font-size:13px}
 .rtg-result-formation{display:inline-block;margin:0 2px;color:var(--cyan);font-size:19px;font-weight:900;letter-spacing:.055em;line-height:1.05}
 @media(max-width:560px){.rtg-model-grid{grid-template-columns:1fr}.rtg-model-grid .wide{grid-column:auto}.rtg-model-score{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.rtg-axis-sub-helper{width:100%;max-width:760px;margin:10px auto 0;padding:10px;border:1px solid var(--cyan-dim);border-radius:10px;background:rgba(31,227,204,.045)}
+.rtg-axis-sub-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px}
+.rtg-axis-sub-result{margin-top:8px;display:grid;gap:7px}
+.rtg-axis-sub-card{border:1px solid var(--line);border-radius:9px;background:var(--panel2);padding:8px 9px}
+.rtg-axis-sub-card .swap{font-size:12px;margin-top:3px}
+@media(max-width:460px){.rtg-axis-sub-actions{grid-template-columns:1fr}}
 .rtg-axis-depth-grid{display:grid;grid-template-columns:minmax(116px,1.45fr) repeat(3,minmax(58px,1fr));gap:7px;align-items:stretch}
 .rtg-axis-depth-grid input{text-align:center;padding:8px 5px}
 .rtg-axis-depth-grid .depth-head{display:flex;align-items:end;justify-content:center;color:var(--cyan);font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:0 2px 3px}
@@ -7456,7 +7462,9 @@ COUNT-CLEAN IS NOT MEMBERSHIP-CLEAN: Argentina previously reconciled at 477 only
 <!-- v5.21.0.1 — DATA UPDATE. Added Quansah 95 Showdown Plus (Bayer Leverkusen, CB/RB, 57/95/95) and Grimaldo 95 Showdown Plus (Atletico Madrid, LM/LW/LB, 94/92/93). -->
 <!-- v5.24.1 — DOCUMENTATION ONLY: ACCEPTED 11-PICK CALIBRATION HORIZON. Section K now records why the no-hold helper calibrates on many 11-pick starting-XI scripts instead of simulating all 23 draft slots and solving every completed 115-offer board. The XI-only model can undervalue backup-only utility such as a second Icon, while the always-live starterBoost/benchPenalty adjustment partially compensates when that card truly improves the projected XI. This is an intentional sample-size/speed trade-off: a few exact full-draft samples are too slow and noisy for stable fitting. Hardcoded offline full-draft weights are rejected as DB-, pivot-, copy-, mix- and rules-dependent; huge offline runs remain useful only as occasional validation, not runtime truth. No logic, UI, solver or database data changed. -->
 <!-- v5.24.2 — RTG finalist navigation now hides only strict gameplay-identical model ties: identical post-chemistry/post-manager stat multisets plus identical model and rating tiebreak values. The highest-ranked representative remains visible, the UI/log reports retained versus unique counts, and the full finalist set is still searched, compared and available to the H2H tournament. Section S permanently rejects production same-hold card-equivalence compression on current evidence: the duplicate-heavy 115-card board is retained as a torture test, while a separate unique-player 23x5 benchmark should be used for realistic runtime. No Draft Solver search logic or DB data changed. -->
-<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.24.2</span></h1>
+<!-- v5.25.0 — QUICK AXIS SUBSTITUTIONS / SIZED RANDOM DRAFTS / RESUME-WARNING UI. Finished RTG/WL XIs now offer a bounded post-solve ATK/BAL/DEF substitution check that keeps the formation, chosen manager, active hard Conditions, exact team rating, exclusions and forced cards, then reports the best legal one- or two-card axis variants without rerunning the full formation search. Random demo generation accepts an optional exact 11–115 card count, always seeds every starting slot and distributes the remainder across the 23 holds with no repeated real player; blank chooses a random size. Draft exact-frontier resume remains fail-closed: changing worker count or parallel layout intentionally restarts because the saved per-worker partition cannot be reinterpreted safely, and the Advanced UI now explains and visibly warns when saved progress may reset. -->
+<!-- v5.25.1 — FORMATION PAGE DEMO-CONTROL CLEANUP. The optional random-card count now sits on its own full-width row, while Load 156 Demo and Random Demo are equal-width peer actions beneath it for a cleaner first-page layout. Solver and database behaviour are unchanged. -->
+<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.25.1</span></h1>
   <div class="cap sub">pacwyn optimiser</div>
   <div style="position:absolute;right:2px;top:40px;text-align:right;font-size:10px;line-height:1.5;color:var(--mut)">Created by <b style="color:var(--ink)">Chenzo</b><br><span style="opacity:.8">Special thanks to BWFCPackfan and Pacyswaz</span></div>
 </header>
@@ -7502,10 +7510,15 @@ COUNT-CLEAN IS NOT MEMBERSHIP-CLEAN: Argentina previously reconciled at 477 only
   <div id="browseModeFooter" style="margin-top:12px">
     <button class="btn" onclick="confirmFormation()">Confirm formation &rarr; build board</button>
     <div class="tiny" id="confirmFormNote" style="margin-top:4px;color:var(--mut)">Pick a formation above, then confirm to build your 23-slot board.</div>
-    <div class="row" style="margin-top:10px;gap:8px">
-      <button class="btn gho sm" onclick="loadDemo()">Load 156 demo</button>
-      <button class="btn gho sm" onclick="loadRandomDemo()">&#127922; Random demo</button>
+    <div style="margin-top:10px">
+      <label style="margin:0 0 4px">Random demo card count <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+      <input id="randomDemoCardCount" type="number" min="11" max="115" step="1" inputmode="numeric" placeholder="random" onblur="clampRandomDemoCount(this)">
+      <div class="row" style="margin-top:8px;gap:8px">
+        <button class="btn gho sm" onclick="loadDemo()">Load 156 demo</button>
+        <button class="btn gho sm" onclick="loadRandomDemo()">&#127922; Random demo</button>
+      </div>
     </div>
+    <div class="tiny">Enter an exact card count from 11 to 115, or leave it blank for a new random size each time. Every starting slot receives at least one card; extra cards are distributed randomly across the 23 draft holds, up to five per hold.</div>
   </div>
 
   <details class="hlp" style="margin-top:14px"><summary>Custom formation (build your own)</summary>
@@ -7639,18 +7652,20 @@ COUNT-CLEAN IS NOT MEMBERSHIP-CLEAN: Argentina previously reconciled at 477 only
       <div id="ratingCeilWarn" style="display:none;font-size:11px;padding:7px 10px;border-radius:0 7px 7px 0;margin-bottom:8px;background:var(--panel2);border-left:2px solid var(--warn);color:var(--warn)"></div>
       </div>
       <label class="tiny" style="display:flex;align-items:center;gap:8px;margin:2px 0 8px;cursor:pointer;color:var(--ink)">
-        <input type="checkbox" id="skipTies" checked onchange="saveAdvSettings()" style="width:auto;margin:0;accent-color:var(--cyan)">
+        <input type="checkbox" id="skipTies" checked onchange="_v18ResumeSettingChanged('Skip ties');saveAdvSettings()" style="width:auto;margin:0;accent-color:var(--cyan)">
         <span><b>Skip ties</b> &mdash; stop at the best score, don&rsquo;t collect every equal-scoring lineup (faster, on by default).</span>
       </label>
       <label class="tiny" style="display:flex;align-items:center;gap:8px;margin:2px 0 8px;cursor:pointer;color:var(--ink)">
-        <input type="checkbox" id="parBeta" onchange="_syncParWorkersEnabled();saveAdvSettings()" style="width:auto;margin:0;accent-color:var(--cyan)">
+        <input type="checkbox" id="parBeta" onchange="_syncParWorkersEnabled();_v18ResumeSettingChanged('parallel-search layout');saveAdvSettings()" style="width:auto;margin:0;accent-color:var(--cyan)">
         <span><b>Parallel search</b> &mdash; split any solve across CPU workers. Same answer, roughly &divide; workers wall-clock. Off by default.</span>
       </label>
       <div id="parWorkersWrap" style="margin:2px 0 8px 26px;transition:opacity .15s ease">
         <label style="font-size:11px;color:var(--mut);display:flex;justify-content:space-between"><span>Workers</span><span id="parWorkersLbl">4</span></label>
-        <input type="range" id="parWorkers" min="2" max="64" value="4" oninput="$('#parWorkersLbl').textContent=this.value" onchange="saveAdvSettings()" style="width:100%">
+        <input type="range" id="parWorkers" min="2" max="64" value="4" oninput="$('#parWorkersLbl').textContent=this.value" onchange="_v18ResumeSettingChanged('worker count');saveAdvSettings()" style="width:100%">
         <p class="tiny" style="margin:2px 0 0">Past your device&rsquo;s core count this stops helping and some devices won&rsquo;t handle the top end well.</p>
       </div>
+      <div id="resumeResetWarning" class="note" style="display:none;margin:8px 0;border-color:var(--warn);color:var(--warn)"></div>
+      <p class="tiny" style="margin:4px 0 0">Exact Keep-searching resume is fail-closed. A saved frontier can continue only with the same draft, formation, rating ceiling, Skip ties, target, diversity mode and exact parallel worker layout. Changing Workers or the parallel toggle intentionally starts the proof fresh; per-worker checkpoints cannot be safely reassigned to a different partition.</p>
       <div style="margin-top:14px">
         <label style="font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block">Solver Node Cap (millions)</label>
         <input type="number" id="nodeCapInput" min="1" value="3" inputmode="numeric" style="width:100%" onblur="clampNodeCap(this);saveAdvSettings()">
@@ -7663,15 +7678,15 @@ COUNT-CLEAN IS NOT MEMBERSHIP-CLEAN: Argentina previously reconciled at 477 only
       </div>
       <div style="margin-top:14px">
         <label style="font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block">Target score (optional)</label>
-        <input type="number" id="targetScore" min="0" placeholder="0 = off" inputmode="numeric" style="width:100%">
+        <input type="number" id="targetScore" min="0" placeholder="0 = off" inputmode="numeric" style="width:100%" onchange="_v18ResumeSettingChanged('target score')">
         <p class="tiny" style="margin:4px 0 0">Only search for squads reaching this final score (incl. manager +2). 0 = off.</p>
       </div>
       <div style="margin-top:14px">
         <label style="font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block">Search diversity &mdash; <span id="divPctLabel" style="color:var(--ink);font-weight:800">100%</span> divstatic <span style="text-transform:none;letter-spacing:0;color:var(--warn);font-weight:600">(needs shuffle passes &gt; 0 &mdash; does not work with parallel search)</span></label>
-        <input type="range" id="divPctSlider" min="0" max="100" step="5" value="100" style="width:100%;margin:0 0 2px;accent-color:var(--cyan)" oninput="_updDivPctLbl()" onchange="saveAdvSettings();_solveCache=null;">
+        <input type="range" id="divPctSlider" min="0" max="100" step="5" value="100" style="width:100%;margin:0 0 2px;accent-color:var(--cyan)" oninput="_updDivPctLbl()" onchange="_v18ResumeSettingChanged('diversity settings');saveAdvSettings();_solveCache=null;">
         <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--mut);margin-bottom:10px"><span>0% (all shuffle)</span><span>50 / 50</span><span>100% (all divstatic)</span></div>
         <label style="font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block">Shuffle passes (0&ndash;256)</label>
-        <input type="number" id="shuffleCount" min="0" max="256" value="0" inputmode="numeric" style="width:100%" onblur="_clampShuffleCount(this);saveAdvSettings();_solveCache=null;">
+        <input type="number" id="shuffleCount" min="0" max="256" value="0" inputmode="numeric" style="width:100%" onblur="_clampShuffleCount(this);_v18ResumeSettingChanged('diversity settings');saveAdvSettings();_solveCache=null;">
         <p class="tiny" style="margin:4px 0 0">Splits the <b>same</b> node cap into a <b>%divstatic</b> phase (best-first) followed by that many independently-seeded <b>shuffle</b> passes, keeping the best result found. A phase that finishes its whole tree still returns the proven optimum. Can occasionally score <i>below</i> 0 passes at the same budget. Tested sweet spot: <b>50&ndash;75% divstatic with 8&ndash;16 passes</b>; &le;25% divstatic tested as a net loss, and gains taper off past ~16&ndash;24 passes. With <b>0 shuffle passes both controls do nothing</b> (plain divstatic solve).</p>
       </div>
       <div style="margin-top:14px">
@@ -11686,6 +11701,27 @@ function _testSearchButtons(mode,res){
   if(exhaustive)return info+'<div class="note" style="margin-top:8px;border-color:var(--good)"><b>Search finished.</b> There is no deeper escalation for '+(limited?'the selected formations':'this pool')+'.</div>';
   return info+'<div class="row" style="margin-top:8px"><button class="btn sec sm" data-test-action="1" onclick="keepSearchingTest(\''+mode+'\',3)">Keep searching ×3</button><button class="btn gho sm" data-test-action="1" onclick="keepSearchingTest(\''+mode+'\',10)">Search much longer ×10</button></div>'+(mode==='rtg'?_rtgEscalationPanelHTML():'');
 }
+let _RTG_AXIS_SUB_BUSY=false;
+function _rtgAxisSubPanelHtml(){return '<div class="rtg-axis-sub-helper rtg-detail"><b>Quick axis substitutions</b><div class="tiny">Check legal one- and two-card same-slot swaps around this exact XI without rerunning every formation. The chosen manager stays fixed; every active hard Condition, exact rating, forced card and current exclusion is preserved. This finds a nearby axis variant, not a new globally optimal RTG solve.</div><div class="rtg-axis-sub-actions"><button class="btn gho sm" type="button" onclick="suggestRtgAxisSubs(\'atk\')">Suggest ATK subs</button><button class="btn gho sm" type="button" onclick="suggestRtgAxisSubs(\'bal\')">Suggest BAL subs</button><button class="btn gho sm" type="button" onclick="suggestRtgAxisSubs(\'def\')">Suggest DEF subs</button></div><div id="rtgAxisSubOut" class="rtg-axis-sub-result"><div class="tiny">Choose an axis to inspect.</div></div></div>';}
+function _rtgAxisSubState(pick,res,conds,mgr,forced){
+  if(!_testSelectionUnique(pick))return null;for(const k of forced)if(!pick.some(c=>_testExclusionCardKey(c)===k))return null;const base=scoreXI(pick);if(!_testNonChemConditionsMet(base,pick,conds)||!_testRtgRatingCapMet(pick,base.rating))return null;const ev=_testEvaluateXIWithManager(pick,res.form,String(res.seed||TEST_SEARCH_SEED)+'|quick-sub',mgr,null,'rtg'),sc=Object.assign({},base,{chem:ev.chemTotal,total:base.total-base.chem+ev.chemTotal,full:ev.chemTotal===3*pick.length});if(!_conditionsMet(sc,pick,conds)||!_testRtgAxisDepthHardMet(ev))return null;return {pick:pick.slice(),mgr:ev,sc,slots:res.form.slots.slice(),rawRating:futRatingRaw(pick.map(c=>Number(c.rating)||0)),ratingSum:pick.reduce((a,c)=>a+(Number(c.rating)||0),0)};
+}
+function _rtgAxisSubMeta(state,axis){const m=state&&state.mgr&&state.mgr.metrics||{},cards=state&&state.mgr&&state.mgr.cards||[],rating=Number(state&&state.sc&&state.sc.rating)||0;return {plus:Number(m.axisPlusOneCounts&&m.axisPlusOneCounts[axis])||0,at:Number((m.axisRatingCounts||m.axisCounts)&&((m.axisRatingCounts||m.axisCounts)[axis]))||0,usable:Number(m.axisDepthCounts&&m.axisDepthCounts[axis])||0,total:cards.reduce((n,x)=>n+(Number(x&&x.stats&&x.stats[axis])||0),0),win:Number(state&&state.mgr&&state.mgr.matchWinProb)||0,chem:Number(state&&state.sc&&state.sc.chem)||0,rating};}
+function _rtgAxisSubCmp(a,b){for(const k of ['plus','at','usable','total'])if(a.meta[k]!==b.meta[k])return b.meta[k]-a.meta[k];if(a.changes.length!==b.changes.length)return a.changes.length-b.changes.length;if(Math.abs(a.meta.win-b.meta.win)>1e-12)return b.meta.win-a.meta.win;if(a.meta.chem!==b.meta.chem)return b.meta.chem-a.meta.chem;return a.key.localeCompare(b.key);}
+function _rtgAxisSubImproves(a,b){return a.plus>b.plus||a.plus===b.plus&&(a.at>b.at||a.at===b.at&&(a.usable>b.usable||a.usable===b.usable&&a.total>b.total));}
+function _findRtgAxisSubs(res,axis){
+  if(!res||!res.state||!res.form||!Array.isArray(res.state.pick)||res.state.pick.length!==11)return {error:'A complete RTG/WL XI is required.'};const priorSettings=_RTG_MODEL_SETTINGS,solveSettings=res.runSettings&&res.runSettings.model;try{if(solveSettings)_RTG_MODEL_SETTINGS=_normaliseRtgModelSettings(solveSettings);const st=res.state,conds=(res.conds||_testConditionsForMode('rtg')||[]).slice(),mgr=st.mgr&&!st.mgr.noManager?st.mgr:null,forced=new Set(Array.from(RTG_FORCE_CARD_KEYS||[]).filter(k=>st.pick.some(c=>_testExclusionCardKey(c)===k))),baseline=_rtgAxisSubState(st.pick,res,conds,mgr,forced)||st,baseMeta=_rtgAxisSubMeta(baseline,axis),all=_makeTestCards(res.seed||TEST_SEARCH_SEED,'rtg').filter(c=>!_testCardIsExcluded(c,RTG_TEST_EXCLUSIONS)&&_testPlayerRatingAllowed(c,conds)&&_testForcedCardAllowed(c,conds)),slots=res.form.slots,currentPeople=new Set(st.pick.map(_testPersonKey)),rawBySlot=[];
+    for(let i=0;i<slots.length;i++){const slot=slots[i],cur=st.pick[i],rows=all.filter(c=>(c.pos||[]).includes(slot)&&_testExclusionCardKey(c)!==_testExclusionCardKey(cur)&&(!currentPeople.has(_testPersonKey(c))||_testPersonKey(c)===_testPersonKey(cur))).map(c=>{const boost=mgr?_testManagerBoostValue(mgr,c,slot):0,raw=(Number(c.fake&&c.fake[axis])||0)+boost,link=Number(mgr&&c.nation===mgr.nation)*3+Number(mgr&&leagueOf(c)===mgr.league)*4,pick=st.pick.slice();pick[i]=c;const base=scoreXI(pick),cheapOk=_testSelectionUnique(pick)&&_testNonChemConditionsMet(base,pick,conds)&&_testRtgRatingCapMet(pick,base.rating)&&Array.from(forced).every(k=>pick.some(x=>_testExclusionCardKey(x)===k));return {c,raw,link,cheapOk,ratingDistance:Math.abs((Number(c.rating)||0)-(Number(cur.rating)||0))};});rows.sort((a,b)=>Number(b.cheapOk)-Number(a.cheapOk)||b.raw-a.raw||b.link-a.link||a.ratingDistance-b.ratingDistance||(Number(a.c.rating)||0)-(Number(b.c.rating)||0)||a.c._tid-b.c._tid);const direct=rows.filter(x=>x.cheapOk).slice(0,24),fallback=rows.filter(x=>!x.cheapOk).sort((a,b)=>a.ratingDistance-b.ratingDistance||b.raw-a.raw).slice(0,6),seenRows=new Set();rawBySlot[i]=direct.concat(fallback).filter(x=>{if(seenRows.has(x.c._tid))return false;seenRows.add(x.c._tid);return true;});}
+    const found=[],seen=new Set(),add=(state,changes)=>{if(!state)return;const meta=_rtgAxisSubMeta(state,axis);if(!_rtgAxisSubImproves(meta,baseMeta))return;const key=state.pick.map(_testExclusionCardKey).join('|');if(seen.has(key))return;seen.add(key);found.push({state,meta,changes,key});};
+    const validSingles=Array.from({length:slots.length},()=>[]);
+    for(let i=0;i<slots.length;i++)for(const row of rawBySlot[i]){const pick=st.pick.slice();pick[i]=row.c;const state=_rtgAxisSubState(pick,res,conds,mgr,forced);if(state){validSingles[i].push({c:row.c,state,meta:_rtgAxisSubMeta(state,axis)});add(state,[{i,from:st.pick[i],to:row.c}]);}}
+    for(let i=0;i<slots.length;i++)validSingles[i].sort((a,b)=>_rtgAxisSubCmp({meta:a.meta,changes:[0],key:String(a.c._tid)},{meta:b.meta,changes:[0],key:String(b.c._tid)}));
+    for(let i=0;i<slots.length;i++)for(let j=i+1;j<slots.length;j++){const ai=[],aj=[],seenI=new Set(),seenJ=new Set(),push=(dst,set,c)=>{if(c&&!set.has(c._tid)){set.add(c._tid);dst.push(c);}};validSingles[i].slice(0,6).forEach(x=>push(ai,seenI,x.c));rawBySlot[i].slice(0,6).forEach(x=>push(ai,seenI,x.c));validSingles[j].slice(0,6).forEach(x=>push(aj,seenJ,x.c));rawBySlot[j].slice(0,6).forEach(x=>push(aj,seenJ,x.c));for(const a of ai)for(const b of aj){if(_testPersonKey(a)===_testPersonKey(b))continue;const pick=st.pick.slice();pick[i]=a;pick[j]=b;add(_rtgAxisSubState(pick,res,conds,mgr,forced),[{i,from:st.pick[i],to:a},{i:j,from:st.pick[j],to:b}]);}}
+    found.sort(_rtgAxisSubCmp);return {rows:found.slice(0,5),baseMeta,axis,manager:mgr?mgr.name:'No manager',checkedSingles:rawBySlot.reduce((n,x)=>n+x.length,0)};
+  }finally{_RTG_MODEL_SETTINGS=priorSettings;}
+}
+function _renderRtgAxisSubs(result){const out=$('#rtgAxisSubOut');if(!out)return;if(result.error){out.innerHTML='<div class="note" style="border-color:var(--bad)">'+esc(result.error)+'</div>';return;}const axis=String(result.axis||'').toUpperCase(),b=result.baseMeta,rows=result.rows||[];if(!rows.length){out.innerHTML='<div class="note"><b>No legal nearby '+axis+' improvement found.</b><br><span class="tiny">The helper checked one- and two-card same-slot swaps under the current formation and manager. A different formation or manager still requires a full solve.</span></div>';return;}out.innerHTML=rows.map((x,idx)=>{const m=x.meta,sw=x.changes.map(c=>'<div class="swap"><b>'+esc(_liveSlotOccurrenceLabel(_lastRtgTestResult.form.slots,c.i))+':</b> '+esc(c.from.label)+' '+c.from.rating+' → <b>'+esc(c.to.label)+' '+c.to.rating+'</b></div>').join('');return '<div class="rtg-axis-sub-card"><b>'+(idx===0?'Best nearby '+axis+' variant':'Alternative '+(idx+1))+' · '+x.changes.length+' substitution'+(x.changes.length===1?'':'s')+'</b>'+sw+'<div class="tiny" style="margin-top:5px">'+axis+' usable '+b.usable+'→'+m.usable+' · at rating '+b.at+'→'+m.at+' · at +1 '+b.plus+'→'+m.plus+' · total '+b.total+'→'+m.total+' · chemistry '+b.chem+'→'+m.chem+' · model win '+(b.win*100).toFixed(1)+'%→'+(m.win*100).toFixed(1)+'% · manager fixed: '+esc(result.manager)+'</div></div>';}).join('')+'<div class="tiny">This is a bounded same-slot substitution check. It does not alter the retained finalist or claim the best possible axis squad across other formations, managers or position rearrangements.</div>';}
+function suggestRtgAxisSubs(axis){axis=String(axis||'').toLowerCase();if(!['atk','bal','def'].includes(axis)||_RTG_AXIS_SUB_BUSY)return;const out=$('#rtgAxisSubOut');if(out)out.innerHTML='<div class="tiny">Checking legal one- and two-card '+axis.toUpperCase()+' substitutions…</div>';_RTG_AXIS_SUB_BUSY=true;setTimeout(()=>{try{_renderRtgAxisSubs(_findRtgAxisSubs(_lastRtgTestResult,axis));}catch(e){if(out)out.innerHTML='<div class="note" style="border-color:var(--bad)">Quick substitution check failed: '+esc(String(e&&e.message||e))+'</div>';}finally{_RTG_AXIS_SUB_BUSY=false;}},20);}
 function _compactRtgResultLayout(el){
   const root=el&&el.querySelector('.summary'),xi=root&&root.querySelector('.xi');if(!root||!xi)return;
   const manager=root.querySelector('.rtg-manager-detail'),nav=root.querySelector('.rtg-finalist-nav'),details=Array.from(root.querySelectorAll('.rtg-detail')).filter(node=>node!==manager);let anchor=xi;
@@ -11743,6 +11779,7 @@ function _renderTestResult(res,mode){
     html+='<div class="test-card">'+chooser+'<div><b style="color:var(--ink)">'+esc(slot)+(isOop?' <span style="color:var(--warn)">(OOP)</span>':'')+' · '+esc(c.label)+variantTxt+'</b> <span class="pill '+esc(c.type)+'">'+esc(c.type)+'</span>'+(repairMode?'<span class="pill" style="background:'+(isRepairNew?'rgba(255,179,64,.16);color:var(--warn)':'rgba(43,212,126,.14);color:var(--good)')+'">'+(isRepairNew?'NEW':'KEPT')+'</span>':'')+' <b style="float:right">'+c.rating+'</b></div><div class="tiny">'+esc(c.nation)+' · '+esc(leagueOf(c))+(c.club?' · '+esc(c.club):'')+specialTxt+'</div>'+stats+'</div>';
   });
   html+='</div>';
+  if(mode==='rtg')html+=_rtgAxisSubPanelHtml(res);
   if(mode==='rtg'&&st.mgr&&!st.mgr.noManager){const same=_rtgEquivalentManagers(st,res.form,res.conds||[]);if(same.length){const shown=same.slice(0,10).map(m=>esc(_managerDisplayName(m,MANAGER_DB))).join(' · '),more=same.length>10?' · +'+(same.length-10)+' more':'';html+='<div class="note rtg-detail rtg-manager-detail" style="margin-top:9px;border-color:var(--cyan-dim)"><b>Same final XI result:</b> '+shown+more+'.<br><span class="tiny">Each listed available manager leaves every player in the same effective chemistry tier and produces the same final ATK/BAL/DEF values. Chemistry 2 and 3 are equivalent here; active team-chemistry conditions are still respected. Managers excluded from your own pool are not listed.</span></div>';}}
   if(repairMode){const retained=Number(st.repairRetained)||0,original=Number(st.repairOriginalCount)||SBC_REPAIR_ORIGINAL_COUNT,changes=Number(st.repairChanges),replacements=Number(st.repairReplacements),additions=Number(st.repairAdditions),removals=Number(st.repairRemovals),newCost=Number(st.repairNewRatingSum)||0;html+='<div class="sbc-repair-summary"><div>Current cards kept<b>'+retained+' / '+original+'</b></div><div>Original cards replaced<b>'+replacements+'</b></div><div>Cards changed or added<b>'+changes+'</b></div></div><div class="tiny" style="margin-top:7px">'+(additions>0?additions+' empty slot'+(additions===1?' was':'s were')+' filled. ':'')+(replacements>0?replacements+' entered card'+(replacements===1?' was':'s were')+' replaced. ':'No entered card was replaced. ')+(removals>0?removals+' entered card'+(removals===1?' was':'s were')+' removed because the active player-count condition allows a smaller squad. ':'')+'New-card rating cost: '+newCost+'. Moving a kept card to another compatible slot does not count as a change.</div>';}
   if(mode==='cups'){
@@ -16249,7 +16286,9 @@ const _V18_FRONTIER_KEY='pacwyn_v18_frontier_v1';
 // JSON stays below ~1.5 MB; above that, retain it in memory for this tab but remove any older disk
 // copy so a stale frontier cannot masquerade as the current one after reload.
 const _V18_FRONTIER_MAX_CHARS=1500000;
-let _v18HashCache=null,_v18PersistLastText=null,_v18PersistNotice='';
+let _v18HashCache=null,_v18PersistLastText=null,_v18PersistNotice='',_v18ResumeDirtyReason='';
+function _v18UpdateResumeNotice(reason){const el=$('#resumeResetWarning');if(!el)return;const has=!!window._v18Ckpt;if(!has){el.style.display='none';el.innerHTML='';_v18ResumeDirtyReason='';return;}const why=String(reason||_v18ResumeDirtyReason||'').trim();el.style.display='block';el.style.borderColor=why?'var(--warn)':'var(--cyan-dim)';el.style.color=why?'var(--warn)':'var(--mut)';el.innerHTML=why?'<b>Saved exact-resume progress may reset.</b><br><span class="tiny">You changed '+esc(why)+'. Keep searching resumes only if the final draft/settings hash and exact worker partition still match; otherwise it deliberately restarts from scratch rather than risk skipping branches.</span>':'<b>Exact-resume progress is saved.</b><br><span class="tiny">Keep the draft and resume-sensitive settings unchanged to continue from the stored frontier.</span>';}
+function _v18ResumeSettingChanged(reason){if(!window._v18Ckpt)return;_v18ResumeDirtyReason=String(reason||'a resume-sensitive setting');_v18UpdateResumeNotice(_v18ResumeDirtyReason);}
 function _v18VersionNow(){return (document.querySelector('h1 span')||{textContent:''}).textContent.replace(/^v/,'').trim()||'0';}
 function _v18DropPersistedOnly(){
   _v18PersistLastText=null;
@@ -16278,7 +16317,7 @@ function _v18PersistFrontier(k,quiet){
 }
 function _v18SetStored(k,opts){
   window._v18Ckpt=k||null;window.__v18RestoredFromDisk=false;
-  _v18PersistFrontier(window._v18Ckpt,!!(opts&&opts.quiet));
+  _v18PersistFrontier(window._v18Ckpt,!!(opts&&opts.quiet));_v18UpdateResumeNotice();
   return window._v18Ckpt;
 }
 function _v18RestorePersisted(){
@@ -16290,7 +16329,7 @@ function _v18RestorePersisted(){
     const w=JSON.parse(raw);
     if(!w||w.v!==1||w.app!==_v18VersionNow()||!w.frontier||typeof w.frontier!=='object')throw new Error('invalid');
     window._v18Ckpt=w.frontier;window.__v18RestoredFromDisk=true;_v18PersistLastText=raw;
-    window._v18PersistStatus={stored:true,chars:raw.length,restored:true};
+    window._v18PersistStatus={stored:true,chars:raw.length,restored:true};setTimeout(()=>_v18UpdateResumeNotice(),0);
     return window._v18Ckpt;
   }catch(e){_v18DropPersistedOnly();return null;}
 }
@@ -22690,69 +22729,22 @@ function loadDemo(){
   document.querySelector('.tabbar button[data-v="v-cards"]').click();
   _clearSolve();if(typeof closeSlot==='function')closeSlot();
 }
+function clampRandomDemoCount(input){
+  const el=input||$('#randomDemoCardCount'),raw=String(el&&el.value||'').trim();if(!el||raw==='')return null;const n=Math.max(11,Math.min(115,Math.round(Number(raw)||11)));el.value=String(n);return n;
+}
 function loadRandomDemo(){
-  // 1. Pick a random formation
-  const f=FORMS[Math.floor(Math.random()*FORMS.length)];
-  chosenForm=f.name;
-  buildBoard(f); // resets cards, uid, board
-
-  const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
-  const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
-
-  // 2. Decide how many busts: 0–11 across any of the 23 slots.
-  //    The solver doesn't care which slot is which so no need to protect pos slots.
-  const numBusts=rnd(0,11);
-
-  // Shuffle helper
-  function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-
-  // 3. Pick numBusts random slots from the full board and bust them
-  const bustSet=new Set(shuffle(board.slice()).slice(0,numBusts).map(s=>s.id));
-
-  // Apply busts
-  board.forEach(s=>{s.busted=bustSet.has(s.id);});
-
-  // 4. For each non-busted slot, pick 1–5 random cards from the DB that fit the slot's position
-  const nonBusted=board.filter(s=>!s.busted);
-
-  // Build a lookup: pos -> playerDB entries whose .pos array includes that pos
-  // For bench slots any position is fine
-  function candidatesFor(slot){
-    if(slot.kind==='bench'||slot.pos===null) return playerDB;
-    return playerDB.filter(p=>(p.pos||[]).includes(slot.pos));
-  }
-
-  nonBusted.forEach(slot=>{
-    const pool=candidatesFor(slot);
-    if(!pool.length) return; // shouldn't happen with a full DB
-    const n=rnd(1,5);
-    // pick n unique entries (by index) — sample without replacement, wrap if pool smaller
-    const indices=shuffle(pool.map((_,i)=>i)).slice(0,Math.min(n,pool.length));
-    indices.forEach(idx=>{
-      const p=pool[idx];
-      cards.push({
-        id:uid++,
-        slot:slot.id,
-        hold:null,
-        label:p.name,
-        type:p.type,
-        rating:p.rating,
-        nation:p.nation,
-        league:p.league,
-        club:p.club,
-        pos:(p.pos||[]).slice(),
-        pidx:p.pidx
-      });
-    });
-    syncSlot(slot.id);
-  });
-
-  // 5. Pick 5 random managers from the DB
-  managers=shuffle(MANAGER_DB.slice()).slice(0,Math.min(5,MANAGER_DB.length))
-    .map(m=>({name:m.name,nation:m.nation,league:m.league}));
-  renderCards();renderMgr();updateSolveForm();saveLocal();
-  document.querySelector('.tabbar button[data-v="v-cards"]').click();
-  _clearSolve();if(typeof closeSlot==='function')closeSlot();
+  const f=FORMS[Math.floor(Math.random()*FORMS.length)];chosenForm=f.name;buildBoard(f);
+  const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,shuffle=arr=>{const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+  const input=$('#randomDemoCardCount'),raw=String(input&&input.value||'').trim(),target=raw===''?rnd(11,115):Math.max(11,Math.min(115,Math.round(Number(raw)||11)));if(input&&raw!=='')input.value=String(target);
+  const counts=new Map(board.map(s=>[s.id,0])),starters=board.filter(s=>s.kind==='pos'),allSlots=board.slice();
+  for(const slot of starters)counts.set(slot.id,1);
+  let remain=target-starters.length;
+  while(remain>0){const open=allSlots.filter(s=>(counts.get(s.id)||0)<5);if(!open.length)break;const slot=open[Math.floor(Math.random()*open.length)];counts.set(slot.id,(counts.get(slot.id)||0)+1);remain--;}
+  const usedPeople=new Set(),personKey=p=>norm(String(p&&p.name||''))+'|'+(p&&p.pidx==null?'':String(p.pidx));
+  function candidatesFor(slot){return playerDB.filter(p=>(slot.kind==='bench'||slot.pos===null||(p.pos||[]).includes(slot.pos))&&!usedPeople.has(personKey(p)));}
+  for(const slot of allSlots){const need=counts.get(slot.id)||0;slot.busted=need===0;if(!need)continue;for(let k=0;k<need;k++){let pool=candidatesFor(slot);if(!pool.length)pool=playerDB.filter(p=>slot.kind==='bench'||slot.pos===null||(p.pos||[]).includes(slot.pos));if(!pool.length)continue;const p=pool[Math.floor(Math.random()*pool.length)],pk=personKey(p);usedPeople.add(pk);cards.push({id:uid++,slot:slot.id,hold:null,label:p.name,type:p.type,rating:p.rating,nation:p.nation,league:p.league,club:p.club,pos:(p.pos||[]).slice(),pidx:p.pidx});}syncSlot(slot.id);}
+  managers=shuffle(MANAGER_DB.slice()).slice(0,Math.min(5,MANAGER_DB.length)).map(m=>({name:m.name,nation:m.nation,league:m.league,boosts:_cloneManagerBoosts(m.boosts)}));
+  renderCards();renderMgr();updateSolveForm();saveLocal();document.querySelector('.tabbar button[data-v="v-cards"]').click();_clearSolve();if(typeof closeSlot==='function')closeSlot();if(typeof _toast==='function')_toast('Built a realistic '+cards.length+'-card random draft · '+f.name+'.');
 }
 
 
