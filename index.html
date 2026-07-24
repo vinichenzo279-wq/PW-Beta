@@ -253,6 +253,54 @@
          This intentionally models random opposing composition/usage, so an equally optimized opponent
          will be harder than these percentages.
 
+
+
+     RTG RETAINED-FINALIST / OLD-BENCHMARK REGRESSION — v5.27.8
+       STATUS:
+         - Every canonical old RTG/WL benchmark is now beaten by at least one squad that the current
+           tool can find and retain. This does NOT mean the first displayed model-probability winner
+           always beats the old benchmark. In some fixtures the required counter-squad is another
+           close-call finalist, discovered by cycling the retained finalists or by running the built-in
+           Optimal-play finalist tournament. That separation is intentional.
+         - Confirmed example: in the Max-85 / Min-83 / Min-4-special / Max-3-per-league fixture, the
+           retained Del Bosque 4-1-3-2 finalist beats the previous Southgate benchmark 5-4 in both
+           opening-caller legs, with two tied rounds in each leg. It was displayed finalist 2 of 3,
+           illustrating why checking only the first finalist is insufficient.
+
+       METHODOLOGY:
+         1. Solve the unchanged canonical fixture under the current Conditions and captured solve-time
+            settings. Do not compare squads built under different exclusions, forced cards, formation
+            scopes, manager availability or opponent-model settings.
+         2. Retain every gameplay-distinct squad inside the configured model-win close-call band, then
+            apply the configured Top N limit. Legal cumulative Quick axis substitution endpoints are
+            eligible for the same retained pool; gameplay-identical variants remain one entrant.
+         3. Validate each retained XI against the original hard Conditions, exact/max team-rating rule,
+            forced-card and exclusion snapshot, fixed formation and chosen manager. Invalid or stale
+            states must fail closed and never enter H2H.
+         4. Compare each retained finalist with the old benchmark using the exact fixed-XI minimax model.
+            Play both opening-caller states: new XI calls first once and old benchmark calls first once.
+            Tied duels score no point and pass the next call. A benchmark is considered covered when at
+            least one currently findable retained finalist wins the exact H2H comparison; the model's
+            displayed probability rank is not substituted for this test.
+         5. Record whether the covering XI was the first displayed finalist, another retained finalist,
+            or a promoted Quick-sub endpoint. This distinguishes search coverage from final H2H choice.
+
+       INTERPRETATION / DESIGN CONTRACT:
+         - Model win probability estimates broad performance against a distribution of condition-valid
+           opponents. It is the candidate-generation and general-strength objective, not a promise that
+           its rank order will match every specific fixed-XI matchup.
+         - Exact H2H answers the narrower question: which retained squad plays best against these exact
+           eleven cards under optimal play? A slightly lower-probability close-call squad may have a more
+           favourable ATK/BAL/DEF shape and therefore beat a benchmark that the first finalist does not.
+         - Therefore probability and H2H remain separate. Do not fold H2H into the DFS priority order or
+           treat the tournament champion as evidence that the probability model is wrong. The intended
+           workflow is: probability search -> close-call retention -> gameplay dedupe -> Top N -> exact
+           home-and-away H2H tournament. Both the broad-probability winner and the matchup-specific H2H
+           winner remain findable and inspectable inside the tool.
+         - Regression acceptance is field-based, not first-row-based: a future release fails this suite
+           only when every retained Top N finalist loses or fails to beat an old benchmark. A first
+           displayed finalist losing while another retained finalist wins is expected successful behavior.
+
      PACWYN SQUAD CODE CHECK:
        - The supplied examples are seven alphanumeric characters and PACWYN accepts them without case,
          so the effective alphabet is at most base-36: about 36.2 bits of information in seven symbols.
@@ -359,7 +407,7 @@
 <meta property="og:description" content="Pacwyn Solver">
 <!-- VERSION: bump this AND the matching v-number in the <h1><span> below on every patch, however
      small — see the longer note next to the <h1> for why this matters. -->
-<title>Pacwyn Solver v5.27.7</title>
+<title>Pacwyn Solver v5.27.11</title>
 <!-- ABOUT THIS APP / DATA SOURCE:
      This tool is for PACWYN, a game that heavily parallels EA FC but is NOT FC — it uses FC's
      real player cards as a base and adds its own exclusive cards on top. That's why FC data is a
@@ -886,6 +934,8 @@ details.hlp p{font-size:12px;color:var(--mut);margin:8px 0 0;line-height:1.55}
 }
 
 </style>
+
+<!-- v5.27.11 — CLOSE-CALL UNIT AUDIT. Preserved Win-first exactly. Corrected Overperformance-first retention to respect its real discrete unit: the displayed metric is an eleven-card average, while the numerator is integer best-stat-minus-rating points. A slider value of 3.00 now means three aggregate XI overperformance points (3/11 average), not 3% of eleven (3.63 aggregate points). Score gap remains scaled to eleven expected rounds; normalized balance, coverage, chemistry and axis-depth utilities remain literal percentage-point bands; team-rating-first remains exact. Updated the active-basis UI to show both aggregate and average overperformance tolerance. -->
 </head>
 <body>
 <header style="position:relative">
@@ -7535,7 +7585,11 @@ COUNT-CLEAN IS NOT MEMBERSHIP-CLEAN: Argentina previously reconciled at 477 only
 <!-- v5.27.2 — RTG WORKER DEPENDENCY FIX. Added the close-call retention helper to the serialized RTG Blob-worker closure, fixing the immediate background-search ReferenceError. The permanent COMMON TRAPS guidance now requires every new solver helper to be verified in the main thread, worker dependency list and a real spawned-worker smoke test because JavaScript syntax checks cannot detect omitted Blob-worker dependencies. -->
 <!-- v5.27.6 — RTG RESULT SECTION FIX. Optimal-play finalists and Quick axis substitutions remain first-class result sections beneath the XI/manager summary instead of being swept into Advanced metrics. Only diagnostic solver details are collapsed. -->
 <!-- v5.27.7 — QUICK-SUB FINALIST PROMOTION. Every legal cumulative Quick axis substitution state is now merged into the already gameplay-deduplicated retained-finalist pool before the configured Top N cut. Equal or saturated model-win variants therefore receive their own optional exact H2H entrant when capacity permits, while gameplay-identical squads remain one entrant and the displayed model winner is unchanged. -->
-<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.27.7</span></h1>
+<!-- v5.27.8 — DOCUMENTATION ONLY: RETAINED-FINALIST BENCHMARK METHODOLOGY. Recorded that every canonical old RTG/WL benchmark is now beaten by at least one currently findable retained finalist, while the covering XI is not always the first displayed model-probability winner. Added the exact field-based regression method: rebuild under the captured solve-time snapshot, validate every retained/Quick-sub entrant, and test both opening-caller exact-minimax legs against each old benchmark. Clarified the intended architecture: probability generates broadly strong close-call candidates; exact H2H separately selects the best squad for a specific opponent. No solver, UI, scoring or database logic changed. -->
+<!-- v5.27.10 — DEVICE-AWARE PARALLEL WORKER GUIDANCE. Added a conservative recommended worker count derived from navigator.hardwareConcurrency, reserving capacity for the browser/UI and applying tighter mobile/iOS stability caps. The UI shows the browser-reported logical-core count, the recommendation, why it is conservative, and a one-tap Use recommended button. It never silently changes a saved worker count, because hardwareConcurrency is only a starting estimate and thermals/browser limits can make fewer workers faster or more stable. -->
+<!-- v5.27.9 — PRESET-AWARE CLOSE-CALL RETENTION. Preserved the exact existing 3-percentage-point model-win band whenever Modelled win probability is priority #1. For every other priority order, finalist retention now follows the first decisive preset criterion, using a metric-scaled equivalent of the same slider: 0–1 utilities use the literal percentage, XI-scale score gap uses the equivalent fraction of 11 rounds, and overperformance interprets the slider directly as aggregate integer XI stat points divided by 11, and team-rating-first remains exact-rating only so the preset cannot be silently weakened. Strict ranking and the displayed preset winner are unchanged; the retained field alone is broadened for exact H2H. Updated UI and logs to state the active retention basis. -->
+
+<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.27.11</span></h1>
   <div class="cap sub">pacwyn optimiser</div>
   <div style="position:absolute;right:2px;top:40px;text-align:right;font-size:10px;line-height:1.5;color:var(--mut)">Created by <b style="color:var(--ink)">Chenzo</b><br><span style="opacity:.8">Special thanks to BWFCPackfan and Pacyswaz</span></div>
 </header>
@@ -7732,8 +7786,10 @@ COUNT-CLEAN IS NOT MEMBERSHIP-CLEAN: Argentina previously reconciled at 477 only
       </label>
       <div id="parWorkersWrap" style="margin:2px 0 8px 26px;transition:opacity .15s ease">
         <label style="font-size:11px;color:var(--mut);display:flex;justify-content:space-between"><span>Workers</span><span id="parWorkersLbl">4</span></label>
-        <input type="range" id="parWorkers" min="2" max="100" value="4" oninput="$('#parWorkersLbl').textContent=this.value" onchange="_v18ResumeSettingChanged('worker count');saveAdvSettings()" style="width:100%">
-        <p class="tiny" style="margin:2px 0 0">Past your device&rsquo;s core count this stops helping and some devices won&rsquo;t handle the top end well.</p>
+        <input type="range" id="parWorkers" min="2" max="100" value="4" oninput="$('#parWorkersLbl').textContent=this.value" onchange="_v18ResumeSettingChanged('worker count');saveAdvSettings();_updateParallelWorkerRecommendation()" style="width:100%">
+        <div id="parWorkerRecommendation" class="note" style="margin:7px 0 0;padding:7px 9px"></div>
+        <button type="button" id="parUseRecommended" class="secondary" onclick="_useRecommendedParallelWorkers()" style="margin-top:6px;width:100%;padding:7px 10px">Use recommended workers</button>
+        <p class="tiny" style="margin:5px 0 0">The browser reports logical processors, not guaranteed usable solver cores. The recommendation reserves capacity for the page and uses stricter mobile limits; heat, battery mode and browser policy can still make one fewer worker more stable.</p>
       </div>
       <div id="resumeResetWarning" class="note" style="display:none;margin:8px 0;border-color:var(--warn);color:var(--warn)"></div>
       <p class="tiny" style="margin:4px 0 0">Exact Keep-searching resume is fail-closed. A saved frontier can continue only with the same draft, formation, rating ceiling, Skip ties, target, diversity mode and exact parallel worker layout. Changing Workers or the parallel toggle intentionally starts the proof fresh; per-worker checkpoints cannot be safely reassigned to a different partition.</p>
@@ -8073,12 +8129,12 @@ COUNT-CLEAN IS NOT MEMBERSHIP-CLEAN: Argentina previously reconciled at 477 only
     </div>
     <details class="hlp" id="rtgModelSettings" style="margin-top:10px">
       <summary id="rtgAdvancedSummary">Advanced — RTG / Draft Cups priorities</summary>
-      <div class="tiny" style="margin-top:7px">Choose the strict ordered criteria used to rank finished squads. The optional close-call setting is separate: after strict ranking, it retains every distinct squad whose modelled win probability is within the selected percentage-point band of the best, up to the Top N finalist cap. Those retained squads can then be tested independently in the exact H2H tournament.</div>
+      <div class="tiny" style="margin-top:7px">Choose the strict ordered criteria used to rank finished squads. Close-call retention is separate from ranking: it preserves near-equal squads under the first priority in the active order, up to the Top N cap, so they can be tested independently in the exact H2H tournament. Win-first keeps the established model-win percentage-point behaviour unchanged.</div>
       <div class="rtg-model-grid">
         <div class="wide"><label>Preset</label><select id="rtgModelPreset" onchange="applyRtgModelPreset(this.value)"><option value="winfirst">Win first</option><option value="balanced">Human-style balanced</option><option value="manager">Manager Mode coverage + 4/4/4 depth</option><option value="wl">Weekend League score gap</option><option value="win">Weekend League 30 wins target</option><option value="rating">Lower team rating first</option><option value="ratingHigh">Higher team rating first</option><option value="chem">Chemistry first</option><option value="custom">Custom</option></select></div>
         <div><label>Opponent benchmark</label><select id="rtgOpponentModel" onchange="readRtgModelSettings(true)"><option value="optimized">Optimized same-rated squads (recommended)</option><option value="strong">Strong same-rated squads</option><option value="broad">Broad / random same-rated squads</option></select></div><div class="wide"><label style="display:flex;align-items:flex-start;gap:8px;margin:0;text-transform:none;letter-spacing:0;color:var(--ink);font-size:12px"><input id="rtgConditionMatchedOpponents" type="checkbox" checked style="width:auto;margin-top:2px" onchange="readRtgModelSettings(true)"><span><b>Match opponents to the active Conditions page</b> <span style="color:var(--warn)">(slower)</span><br><span class="tiny">Default on. The opponent sample must meet the shared Conditions page only. Force player/manager, exclusions, optional axis-depth settings, rating-cap search shaping and other own-squad controls are never copied to opponents.</span></span></label></div>
         <div><label>Top N finalists to retain</label><input id="rtgFinalistCount" type="number" min="1" max="1000" step="1" value="5" inputmode="numeric" oninput="updateRtgFinalistCountWarning(this)" onblur="clampRtgFinalistCount(this)"><div id="rtgFinalistCountWarn" class="tiny" style="display:none;color:var(--warn);margin-top:5px">Over 100 finalists is excessive and likely meaningless: many alternatives will be near-duplicates, and coordinated repair can become dramatically slower.</div></div>
-        <div class="wide" style="border:1px solid var(--line);border-radius:9px;background:rgba(17,28,39,.55);padding:9px"><label style="display:flex;align-items:flex-start;gap:8px;margin:0;text-transform:none;letter-spacing:0;color:var(--ink);font-size:12px"><input id="rtgCloseCallEnabled" type="checkbox" checked style="width:auto;margin-top:2px" onchange="readRtgModelSettings(true)"><span><b>Retain all model close calls for H2H</b><br><span class="tiny">Strict priority ranking still selects the displayed model winner. Separately, every distinct squad within this many model-win percentage points of the best survives as its own finalist until the Top N cap is reached. Turn this off to retain the ordinary strict Top N only.</span></span></label><div id="rtgCloseCallPanel" style="margin-top:8px"><label>Model-win retention band: <span id="rtgCloseCallValue">3.00 percentage points</span></label><input id="rtgCloseCallWinPp" type="range" min="0" max="10" step="0.05" value="3" oninput="updateRtgCloseCallValue(this)" onchange="readRtgModelSettings(true)"><div class="tiny">0.00 retains only exact model-win ties. Up to 10.00 can be used for a major optional tournament; Top N still limits how many finalists are repaired and stored.</div></div></div>
+        <div class="wide" style="border:1px solid var(--line);border-radius:9px;background:rgba(17,28,39,.55);padding:9px"><label style="display:flex;align-items:flex-start;gap:8px;margin:0;text-transform:none;letter-spacing:0;color:var(--ink);font-size:12px"><input id="rtgCloseCallEnabled" type="checkbox" checked style="width:auto;margin-top:2px" onchange="readRtgModelSettings(true)"><span><b>Retain preset close calls for H2H</b><br><span class="tiny">Strict priority ranking still selects the displayed preset winner. Separately, near-equal squads under the first active priority survive as finalists until the Top N cap. Win-first continues to use the exact model-win percentage-point band; other presets use a safe metric-scaled equivalent.</span></span></label><div id="rtgCloseCallPanel" style="margin-top:8px"><label>Close-call retention band: <span id="rtgCloseCallValue">3.00 percentage points</span></label><div id="rtgCloseCallBasis" class="tiny" style="margin:3px 0 5px"></div><input id="rtgCloseCallWinPp" type="range" min="0" max="10" step="0.05" value="3" oninput="updateRtgCloseCallValue(this)" onchange="readRtgModelSettings(true)"><div class="tiny">0.00 retains only exact ties in the first priority. Up to 10.00 can be used for a broader optional tournament; Top N still limits how many finalists are repaired and stored. Team-rating-first always requires the exact same team rating.</div></div></div>
         <div id="rtgRatingCapBox" class="wide" style="border:1px solid var(--cyan-dim);border-radius:9px;background:rgba(17,28,39,.55);padding:9px">
               <label style="display:flex;align-items:flex-start;gap:8px;margin:0;text-transform:none;letter-spacing:0;color:var(--ink);font-size:13px"><input id="rtgRatingCapEnabled" type="checkbox" style="width:auto;margin-top:2px" onchange="readRtgModelSettings(true)"><span><b>Hard-limit high-rated outliers</b><br><span class="tiny">Optional hard RTG/WL search-shaping gate, not a scoring rule. Off by default. Normal staged search already builds a strong internal +3 incumbent first, then probes credible higher-rated outliers after the core XI exists. Enable this only when you deliberately want every branch containing a card above the chosen final-rating gap rejected for the entire search. Low-rated overperformers are never penalised.</span></span></label>
               <div id="rtgRatingCapPanel" style="margin-top:8px;max-width:360px"><label style="margin-top:0">Reject cards this many ratings above final squad rating</label><input id="rtgRatingCapAbove" type="number" min="0" max="10" step="1" value="3" inputmode="numeric" onblur="clampRtgRatingCap(this)"><div class="tiny">When this optional gate is on, 3 means a final 85-rated squad may use cards up to 88 and rejects 89+. Set 0 to allow no card above the final squad rating. Leave it off for the recommended staged mode: the core search uses +3 internally, then credible higher outliers are tested after a strong XI exists. Turn it on to keep the hard gate for the whole search.</div></div>
@@ -9100,7 +9156,7 @@ function readRtgModelSettings(save){
 function moveRtgPriority(index,delta){const s=_normaliseRtgModelSettings(_RTG_MODEL_SETTINGS),j=index+delta;if(j<0||j>=s.order.length)return;const t=s.order[index];s.order[index]=s.order[j];s.order[j]=t;s.preset=_rtgNamedPresetForSettings(s);_RTG_MODEL_SETTINGS=_normaliseRtgModelSettings(s);renderRtgModelSettings();_saveRtgModelSettings();}
 function setRtgRatingDirection(direction){const s=_normaliseRtgModelSettings(_RTG_MODEL_SETTINGS);s.ratingDirection=direction==='higher'?'higher':'lower';s.preset=_rtgNamedPresetForSettings(s);_RTG_MODEL_SETTINGS=_normaliseRtgModelSettings(s);renderRtgModelSettings();_saveRtgModelSettings();}
 function rtgPriorityChanged(index,value){const s=_normaliseRtgModelSettings(_RTG_MODEL_SETTINGS),old=s.order[index],other=s.order.indexOf(value);if(other>=0&&other!==index)s.order[other]=old;s.order[index]=value;s.preset=_rtgNamedPresetForSettings(s);_RTG_MODEL_SETTINGS=_normaliseRtgModelSettings(s);renderRtgModelSettings();_saveRtgModelSettings();}
-function updateRtgCloseCallValue(input){const el=input||$('#rtgCloseCallWinPp'),out=$('#rtgCloseCallValue'),n=Math.round((Number(el&&el.value)||0)*20)/20;if(out)out.textContent=n.toFixed(2)+' percentage points';}
+function updateRtgCloseCallValue(input){const el=input||$('#rtgCloseCallWinPp'),out=$('#rtgCloseCallValue'),basisEl=$('#rtgCloseCallBasis'),n=Math.round((Number(el&&el.value)||0)*20)/20;if(out)out.textContent=n.toFixed(2)+' percentage points';if(basisEl){const s=_normaliseRtgModelSettings(_RTG_MODEL_SETTINGS),b=_testRtgCloseCallBasis(s),tol=b.tolerance,detail=b.id==='win'?n.toFixed(2)+' model-win percentage points':b.id==='rating'?'exact team-rating ties only':(b.id==='scoregap'?'±'+tol.toFixed(2)+' expected rounds':b.id==='overperformance'?'±'+(tol*11).toFixed(2)+' total XI overperformance points ('+tol.toFixed(3)+' average)':'±'+tol.toFixed(3)+' utility');basisEl.textContent='Active basis: '+b.label+' · '+detail+'.';}}
 function updateRtgFinalistCountWarning(input){const el=input||$('#rtgFinalistCount'),warn=$('#rtgFinalistCountWarn'),n=Math.round(Number(el&&el.value));if(warn)warn.style.display=Number.isFinite(n)&&n>100?'block':'none';}
 function clampRtgFinalistCount(input){const el=input||$('#rtgFinalistCount'),n=Math.round(Number(el&&el.value));if(el)el.value=String(Number.isFinite(n)?Math.max(1,Math.min(1000,n)):5);updateRtgFinalistCountWarning(el);readRtgModelSettings(true);}
 function updateRtgRepairTime(input){const el=input||$('#rtgRepairTimeSeconds'),out=$('#rtgRepairTimeValue'),n=Math.round(Number(el&&el.value));if(out)out.textContent=(Number.isFinite(n)?n:60)+' seconds';}
@@ -10890,10 +10946,29 @@ function _testRtgMetricTolerance(id,a,b){
   // remains strictly lexicographic so the model winner is stable and independently testable.
   return 1e-12;
 }
+function _testRtgCloseCallTolerance(id,settings){
+  const s=settings||_testRtgModelSettings(),fraction=Math.max(0,Number(s.closeCallWinPp)||0)/100;
+  // Preserve the established win-first behaviour exactly. Other metrics use the same slider as a
+  // scale-aware retention budget, never as a comparator tolerance. Rating-first stays exact because
+  // allowing a different team rating would silently defeat the purpose of that preset.
+  if(id==='win')return fraction;
+  if(id==='scoregap')return fraction*11;
+  // Overperformance is exposed as an XI average, but its underlying numerator is a sum of integer
+  // best-stat-minus-card-rating points. Treat the slider value as aggregate XI points: 3.00 means
+  // up to three total overperformance points across the eleven cards, i.e. 3/11 on the average.
+  // This avoids the previous 3% * 11 = 0.33 average mapping, which actually admitted 3.63 points.
+  if(id==='overperformance')return Math.max(0,Number(s.closeCallWinPp)||0)/11;
+  if(id==='balance'||id==='coverage'||id==='chemistry'||id==='axisdepth')return fraction;
+  return 0;
+}
+function _testRtgCloseCallBasis(settings){
+  const s=settings||_testRtgModelSettings(),id=(s.order||[])[0]||'win',labels={win:'model-win probability',scoregap:'expected round-score gap',overperformance:'stat overperformance',balance:'best-axis squad balance',coverage:'second-axis / axis coverage',chemistry:'low-chem safety',axisdepth:'forced-axis depth',rating:'team rating (exact only)'};
+  return {id,label:labels[id]||id,tolerance:_testRtgCloseCallTolerance(id,s)};
+}
 function _testRtgCloseCallRetentionMet(candidate,best){
   const s=_testRtgModelSettings();if(!s.closeCallEnabled||!candidate||!best)return false;
-  const cv=Number(candidate.mgr&&candidate.mgr.matchWinProb),bv=Number(best.mgr&&best.mgr.matchWinProb),band=Math.max(0,Number(s.closeCallWinPp)||0)/100;
-  return Number.isFinite(cv)&&Number.isFinite(bv)&&bv-cv<=band+1e-12;
+  const basis=_testRtgCloseCallBasis(s),cv=_testRtgMetricValue(candidate.mgr,basis.id),bv=_testRtgMetricValue(best.mgr,basis.id);
+  return Number.isFinite(cv)&&Number.isFinite(bv)&&bv-cv<=basis.tolerance+1e-12;
 }
 function _testRtgEvalCmp(a,b){
   if(!a)return b?-1:0;if(!b)return 1;let softened=false;for(const id of _testRtgCriteriaOrder()){const av=_testRtgMetricValue(a,id),bv=_testRtgMetricValue(b,id),d=av-bv,t=_testRtgMetricTolerance(id,a,b);if(Math.abs(d)>t)return d>0?1:-1;if(Math.abs(d)>1e-12)softened=true;}
@@ -10941,8 +11016,8 @@ function _testRtgFinalistCardKeys(row){return new Set(((row&&row.state&&row.stat
 function _testRtgFinalistOverlap(a,b){const A=_testRtgFinalistCardKeys(a),B=_testRtgFinalistCardKeys(b);let n=0;for(const k of A)if(B.has(k))n++;return n;}
 function _testSelectDiverseRtgFinalists(rows,limit){
   const pool=(rows||[]).filter(x=>x&&x.state&&x.form).slice(),n=Math.max(1,Math.min(pool.length,Number(limit)||1));if(!pool.length)return [];
-  // v5.27.1: rows are already in strict priority order. With retention enabled, keep only model-win
-  // close calls to the strict winner; never fill spare places with squads outside the requested band.
+  // v5.27.9: rows are already in strict priority order. With retention enabled, keep only close calls
+  // under the first active preset priority; win-first retains its established model-win band unchanged.
   const settings=_testRtgModelSettings();if(settings.closeCallEnabled){const best=pool[0].state,close=pool.filter(r=>_testRtgCloseCallRetentionMet(r.state,best));return close.slice(0,n);}
   return pool.slice(0,n);
 }
@@ -11621,7 +11696,7 @@ function _testWorkerFunctionSource(){
     _testHasChemCondition,_testChemOrderScore,_testWouldViolateUpper,_testCandidateList,_testPartialConditionValue,_testPartialConditionsPossible,_testAvailableCards,
     _testSymmetryAllowed,_testPredicateCapacity,_testMaxPredicateMatching,_testMaxSlotPredicateMatching,_testAxisForwardBenchmark,_testAxisForwardMaxBoost,_testAxisForwardValue,_testForcedAxisForwardPossible,_testPruneStat,_testConditionValueOfCard,_testMaxNewDistinctMatching,_testMaxSameCapacityMatching,_testChooseNextInfo,_testMinCostFlowExact,_testSbcMatchingLowerBound,_testChemBounds,
     _testForwardPossible,_testConditionRank,_testNeedScore,_testChemCounts,_testChemPerCardWithManager,_testChemStatPenalty,_testTotalStatPenalty,_testSelectorMatches,_testManagerBoosts,_testManagerBoostValue,
-    _testManagerCandidates,_testManagerRuleMap,_testManagerSimplyDominates,_testRtgManagerPool,_testMaxManagerBoostValue,_testRtgFormSignature,_testRtgFormationUpperBound,_testTeamChemConditionMet,_testEvaluateXIWithManager,_testRtgMetricTolerance,_testRtgEvalCmp,_bestTestManagerFromPool,_bestTestManager,_testNonChemConditionsMet,_testRtgRawRating,_testRtgStateBetter,_testRevealAssignmentScore,_testRtgLeastRevealAssignment,_testRtgCloseCallRetentionMet,_testRtgStateSignature,_testAddRtgFinalist,_testRtgFinalistCardKeys,_testRtgFinalistOverlap,_testSelectDiverseRtgFinalists,_testSbcRatingVector,_testSbcRatingVectorCmp,_testSbcStateVector,_testSbcStateBetter,_testSbcOptimisticRatingVector,_testFinalizeXI,_testRtgChannelScale,_testEffortProfile,_testRtgRepairProbePlan,_testRtgPrimaryChallenger,_testRtgRepairPass,_testPrepareInfos,_testRecordPoolStats,
+    _testManagerCandidates,_testManagerRuleMap,_testManagerSimplyDominates,_testRtgManagerPool,_testMaxManagerBoostValue,_testRtgFormSignature,_testRtgFormationUpperBound,_testTeamChemConditionMet,_testEvaluateXIWithManager,_testRtgMetricTolerance,_testRtgEvalCmp,_bestTestManagerFromPool,_bestTestManager,_testNonChemConditionsMet,_testRtgRawRating,_testRtgStateBetter,_testRevealAssignmentScore,_testRtgLeastRevealAssignment,_testRtgCloseCallTolerance,_testRtgCloseCallBasis,_testRtgCloseCallRetentionMet,_testRtgStateSignature,_testAddRtgFinalist,_testRtgFinalistCardKeys,_testRtgFinalistOverlap,_testSelectDiverseRtgFinalists,_testSbcRatingVector,_testSbcRatingVectorCmp,_testSbcStateVector,_testSbcStateBetter,_testSbcOptimisticRatingVector,_testFinalizeXI,_testRtgChannelScale,_testEffortProfile,_testRtgRepairProbePlan,_testRtgPrimaryChallenger,_testRtgRepairPass,_testPrepareInfos,_testRecordPoolStats,
     _testMergeSearchStats,_testBudgetReached,_testRequiredConditionRequirements,_testRequiredSeedOptions,_testEnumerateRequiredSeeds,_testExactChemCondition,_testRestrictiveConditionSeed,_testRtgZeroConditionRetry,_testFeasibleDFS,_testOptimiseDFS,_testSearchConfig,_testConditionOpponentCards,_testRtgLocalPolishState,_testRtgLocalPolishPrimaryClose,_testRtgLocalPolishBest,_testRtgLocalPolishFinalists,_runRtgTestSearchCore,_testRtgLateOutlierProbe,_runRtgTestSearch,_runSbcTestSearch,_runSbcRepairSearch,_draftCupNaturalMatching,_draftCupSlotSummary,_draftCupActualOopSlots,_draftCupFinalizeNoManager,_draftCupFinalize,_runDraftCupSearchPrepared,_runDraftCupManagerSearchPrepared];
   return fns.map(f=>f.toString()).join('\n');
 }
@@ -11964,7 +12039,7 @@ function _testSolverLogText(mode){
   const ex=res.exclusions||{cards:[],managers:[]},runSettings=mode==='rtg'&&res.runSettings?res.runSettings:null,loggedModel=runSettings&&runSettings.model?_normaliseRtgModelSettings(runSettings.model):_testRtgModelSettings();
   if(mode==='rtg'){
     const rs=runSettings||_rtgRunSettingsSnapshot({rtgModelSettings:loggedModel,rtgFormationScope:res.search&&res.search.userFormationLimited?{enabled:true,total:Number(res.search.totalFormsAvailable)||FORMS.length,names:(res.search.selectedFormationNames||[]).slice()}:{enabled:false,total:FORMS.length,names:[]},rtgNoManagers:false,managerExcluded:[]}),m=loggedModel,scope=rs.formationScope||{};
-    lines.push('','RTG settings at solve start:','  Snapshot source: '+(runSettings?'stamped when Solve was pressed':'legacy result — reconstructed from current controls'),'  Settings schema: '+Number(rs.settingsSchema||_RTG_MODEL_SCHEMA)+' · app '+String(rs.appVersion||_rtgCurrentAppVersion()),'  Preset: '+String(m.preset||_rtgNamedPresetForSettings(m)),'  Escalation effort: '+_rtgEscalationEffortText(rs.effortChannels||q.effortChannels||RTG_ESCALATION_EFFORT),'  Priority order: '+m.order.map((id,i)=>(i+1)+'. '+_rtgLogModelLabel(id,m)).join(' > '),'  Coverage preference: '+_rtgLogOnOff(m.coverageEnabled),'  Draft Cups gentler chemistry: '+_rtgLogOnOff(m.draftCupsGentle),'  Final coordinated repair: '+_rtgLogOnOff(m.repairEnabled),'  Optional deep-repair safety time: '+Number(m.repairTimeSeconds||60)+' seconds','  Base Top-N repair target: '+Number(m.repairMissedCandidateCount||0),'  Top-N absolute-axis filter: '+(m.repairAxisFloorEnabled?'on':'off'),'  Squad mode: '+(rs.wlMode?'Weekend League':'RTG'),'  Expensive win-probability formation bound: '+_rtgLogOnOff(m.winBoundEnabled),'  DFS pruning policy: sound Condition forward bounds always on · person/count/distinct/max-same Hall relaxations enabled · hard axis-depth is completed-XI only','  Hard axis-depth gates: '+_rtgLogOnOff(m.axisDepthHardEnabled),'  Axis depth additive layers — usable ATK/BAL/DEF: '+m.axisDepthMinAtk+'/'+m.axisDepthMinBal+'/'+m.axisDepthMinDef,'  Axis depth additive layers — at rating ATK/BAL/DEF: '+m.axisDepthRatingMinAtk+'/'+m.axisDepthRatingMinBal+'/'+m.axisDepthRatingMinDef,'  Axis depth additive layers — at +1 ATK/BAL/DEF: '+m.axisDepthPlusOneMinAtk+'/'+m.axisDepthPlusOneMinBal+'/'+m.axisDepthPlusOneMinDef,'  High-rated outlier search: '+(m.ratingCapEnabled?'hard cap on · team rating +'+m.ratingCapAbove:'staged · internal +3 incumbent then late higher-outlier probes'),'  Opponent benchmark: '+m.opponentModel,'  Conditions-page matched opponents: '+_rtgLogOnOff(m.conditionMatchedOpponents),'  Close-call finalist retention: '+(m.closeCallEnabled?(Number(m.closeCallWinPp||0).toFixed(2)+' model-win percentage points'):'off · ordinary strict Top N'),'  Top N finalists retained: '+Number(m.finalistCount||1),'  Formation limit: '+(scope.enabled?'on · '+(scope.names||[]).join(', '):'off · all formations'),'  No managers available: '+_rtgLogOnOff(rs.noManagers),'  Manager DB variants: '+Number(rs.managerPoolTotal||0),'  Manager exclusions at solve start: '+Number(rs.managerExcludedCount||0),'  Forced exact cards: '+((rs.forcedPlayers||[]).length?(rs.forcedPlayers||[]).join(', '):'none'),'  Forced manager: '+(rs.forcedManager||'none'));
+    lines.push('','RTG settings at solve start:','  Snapshot source: '+(runSettings?'stamped when Solve was pressed':'legacy result — reconstructed from current controls'),'  Settings schema: '+Number(rs.settingsSchema||_RTG_MODEL_SCHEMA)+' · app '+String(rs.appVersion||_rtgCurrentAppVersion()),'  Preset: '+String(m.preset||_rtgNamedPresetForSettings(m)),'  Escalation effort: '+_rtgEscalationEffortText(rs.effortChannels||q.effortChannels||RTG_ESCALATION_EFFORT),'  Priority order: '+m.order.map((id,i)=>(i+1)+'. '+_rtgLogModelLabel(id,m)).join(' > '),'  Coverage preference: '+_rtgLogOnOff(m.coverageEnabled),'  Draft Cups gentler chemistry: '+_rtgLogOnOff(m.draftCupsGentle),'  Final coordinated repair: '+_rtgLogOnOff(m.repairEnabled),'  Optional deep-repair safety time: '+Number(m.repairTimeSeconds||60)+' seconds','  Base Top-N repair target: '+Number(m.repairMissedCandidateCount||0),'  Top-N absolute-axis filter: '+(m.repairAxisFloorEnabled?'on':'off'),'  Squad mode: '+(rs.wlMode?'Weekend League':'RTG'),'  Expensive win-probability formation bound: '+_rtgLogOnOff(m.winBoundEnabled),'  DFS pruning policy: sound Condition forward bounds always on · person/count/distinct/max-same Hall relaxations enabled · hard axis-depth is completed-XI only','  Hard axis-depth gates: '+_rtgLogOnOff(m.axisDepthHardEnabled),'  Axis depth additive layers — usable ATK/BAL/DEF: '+m.axisDepthMinAtk+'/'+m.axisDepthMinBal+'/'+m.axisDepthMinDef,'  Axis depth additive layers — at rating ATK/BAL/DEF: '+m.axisDepthRatingMinAtk+'/'+m.axisDepthRatingMinBal+'/'+m.axisDepthRatingMinDef,'  Axis depth additive layers — at +1 ATK/BAL/DEF: '+m.axisDepthPlusOneMinAtk+'/'+m.axisDepthPlusOneMinBal+'/'+m.axisDepthPlusOneMinDef,'  High-rated outlier search: '+(m.ratingCapEnabled?'hard cap on · team rating +'+m.ratingCapAbove:'staged · internal +3 incumbent then late higher-outlier probes'),'  Opponent benchmark: '+m.opponentModel,'  Conditions-page matched opponents: '+_rtgLogOnOff(m.conditionMatchedOpponents),'  Close-call finalist retention: '+(m.closeCallEnabled?(()=>{const b=_testRtgCloseCallBasis(m),v=Number(m.closeCallWinPp||0).toFixed(2);return v+' slider points · basis '+b.label+(b.id==='rating'?' · exact rating only':' · tolerance '+Number(b.tolerance||0).toFixed(b.id==='win'?4:3));})():'off · ordinary strict Top N'),'  Top N finalists retained: '+Number(m.finalistCount||1),'  Formation limit: '+(scope.enabled?'on · '+(scope.names||[]).join(', '):'off · all formations'),'  No managers available: '+_rtgLogOnOff(rs.noManagers),'  Manager DB variants: '+Number(rs.managerPoolTotal||0),'  Manager exclusions at solve start: '+Number(rs.managerExcludedCount||0),'  Forced exact cards: '+((rs.forcedPlayers||[]).length?(rs.forcedPlayers||[]).join(', '):'none'),'  Forced manager: '+(rs.forcedManager||'none'));
   }
   lines.push('','Exclusions:');if((ex.cards||[]).length)lines.push('  Exact cards: '+ex.cards.join(', '));if((ex.managers||[]).length)lines.push('  Managers: '+ex.managers.join(', '));if(mode==='rtg'&&((ex.forcedPlayers||[]).length||ex.forcedManager)){lines.push('','Forced inputs:');for(const x of (ex.forcedPlayers||[]))lines.push('  Exact card: '+x);if(ex.forcedManager)lines.push('  Manager: '+ex.forcedManager);}const cf=ex.candidateFilters||null;if(cf&&Array.isArray(cf.cardTypes)&&cf.cardTypes.length)lines.push('  Card types: '+cf.cardTypes.join(', '));if(cf&&cf.excludeBelow)lines.push('  Ratings below '+cf.below+': excluded');if(cf&&cf.excludeAbove)lines.push('  Ratings above '+cf.above+': excluded');if(!(ex.cards||[]).length&&!(ex.managers||[]).length&&!(cf&&((cf.cardTypes||[]).length||cf.excludeBelow||cf.excludeAbove)))lines.push('  none');
   lines.push('','Search:','  Result formation: '+res.form.name);
@@ -15152,6 +15227,39 @@ function solveBest(form,cards,nodeCap,ratingCeil,seedBest,seedXIs,skipTies,diver
 // Diversity modes are intentionally NOT combined with the parallel path in this beta.
 function _parallelBetaOn(){const cb=$('#parBeta');return !!(cb&&cb.checked);}
 function _parWorkerCount(){const el=$('#parWorkers');const v=el?parseInt(el.value,10):4;return(isNaN(v)||v<2)?2:Math.min(v,64);}
+function _parallelDeviceProfile(){
+  const reported=Math.max(0,Number(navigator.hardwareConcurrency)||0);
+  const ua=(navigator.userAgent||'');
+  const ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const android=/Android/i.test(ua);
+  const coarse=!!(window.matchMedia&&window.matchMedia('(pointer:coarse)').matches);
+  const mobile=ios||android||(coarse&&Math.min(screen.width||9999,screen.height||9999)<900);
+  let recommended=4;
+  if(reported){
+    if(ios) recommended=Math.min(4,Math.max(2,Math.floor(reported/2)));
+    else if(mobile) recommended=Math.min(6,Math.max(2,reported-2));
+    else recommended=Math.min(12,Math.max(2,reported-2));
+  }
+  return {reported,recommended,ios,mobile};
+}
+function _updateParallelWorkerRecommendation(){
+  const box=$('#parWorkerRecommendation'),btn=$('#parUseRecommended'),el=$('#parWorkers');
+  if(!box)return;
+  const p=_parallelDeviceProfile(),current=el?Math.max(2,parseInt(el.value,10)||4):4;
+  const source=p.reported?(p.reported+' logical processor'+(p.reported===1?'':'s')+' reported'):'logical core count hidden by this browser';
+  const device=p.ios?'iOS/iPadOS':(p.mobile?'mobile':'desktop-class');
+  const delta=current-p.recommended;
+  const verdict=delta===0?'Current setting matches the recommendation.':(delta>0?'Current setting is '+delta+' above the conservative recommendation.':'Current setting is '+(-delta)+' below the recommendation.');
+  box.innerHTML='<b>Recommended: '+p.recommended+' workers</b><br><span class="tiny">'+source+' · '+device+' profile. '+verdict+'</span>';
+  if(btn){btn.disabled=current===p.recommended;btn.textContent=current===p.recommended?'Recommended worker count selected':'Use recommended ('+p.recommended+')';}
+}
+function _useRecommendedParallelWorkers(){
+  const el=$('#parWorkers'),lbl=$('#parWorkersLbl');if(!el)return;
+  const n=_parallelDeviceProfile().recommended;
+  if(String(el.value)!==String(n))_v18ResumeSettingChanged('worker count');
+  el.value=String(n);if(lbl)lbl.textContent=String(n);
+  saveAdvSettings();_updateParallelWorkerRecommendation();
+}
 // Bench/manager work may still run inside one background Worker when Parallel is off, but it must
 // never be PARTITIONED. The slider is therefore consulted only through this gate.
 function _benchMgrWorkerCount(jobCount){return _parallelBetaOn()?Math.max(1,Math.min(jobCount||1,_parWorkerCount())):1;}
@@ -15164,6 +15272,7 @@ function _syncParWorkersEnabled(){
   const on=_parallelBetaOn(),el=$('#parWorkers'),wrap=$('#parWorkersWrap');
   if(el){el.disabled=!on;el.setAttribute('aria-disabled',on?'false':'true');}
   if(wrap){wrap.style.opacity=on?'1':'0.42';wrap.style.filter=on?'none':'grayscale(1)';}
+  _updateParallelWorkerRecommendation();
 }
 function _buildSolverWorkerBlob(){
   // FIX (v16.16.1.1): trueChem was split into trueChemPerCard (real logic) + trueChem (thin sum
