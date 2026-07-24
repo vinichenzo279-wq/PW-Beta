@@ -348,7 +348,7 @@
 <meta property="og:description" content="Pacwyn Solver">
 <!-- VERSION: bump this AND the matching v-number in the <h1><span> below on every patch, however
      small — see the longer note next to the <h1> for why this matters. -->
-<title>Pacwyn Solver v5.24.1</title>
+<title>Pacwyn Solver v5.24.2</title>
 <!-- ABOUT THIS APP / DATA SOURCE:
      This tool is for PACWYN, a game that heavily parallels EA FC but is NOT FC — it uses FC's
      real player cards as a base and adds its own exclusive cards on top. That's why FC data is a
@@ -4509,6 +4509,30 @@ details.hlp p{font-size:12px;color:var(--mut);margin:8px 0 0;line-height:1.55}
             DEFER: revisit only once a dup-heavy real DB exists; it's "free money contingent on data,"
             not an algorithmic win.
 
+          REASSESSMENT v5.24.2 — PERMANENTLY REJECTED FOR THE CURRENT DRAFT FORMAT. A deliberately
+            pathological 115-card import containing five identical Rice cards, three identical
+            Zanetti cards, duplicate Buffons/Haalands and repeated real players proved that same-hold
+            collapse can remove enormous artificial symmetry: the winning XI alone had at least
+            2×3×5×2 = 60 score-identical physical representations. That board remains useful as a
+            duplicate-symmetry torture test, but it is not a runtime benchmark for a real draft,
+            which cannot offer the same real player repeatedly across the completed board.
+            A stricter and genuinely sound extension was also considered: collapse DIFFERENT players
+            inside one hold only when every solver-relevant property matches, then expand them back
+            into tied result identities when Skip ties is off. Detection itself is cheap, but correct
+            expansion touches tie Cartesian products, hold picks, bench/manager insurance, conditions,
+            diversity, parallel-worker merging, checkpoints and recreation logs. More importantly,
+            current-DB incidence is far too low: rough combinatorial screening found about one such
+            pair per 39,000 arbitrary five-card packs, or about one per 230 hypothetical all-Icon
+            packs. Across 23 holds that is still usually zero or one collapsed branch, nowhere near
+            enough to justify permanent identity plumbing or even a small always-paid precheck on a
+            working exact solver. Soundness proves only that an optimization may be used; it does not
+            prove measured improvement (the H2/Hall rejections are the standing precedent).
+            Therefore: cross-hold collapse remains UNSOUND; literal impossible duplicate imports may
+            be normalized externally; same-hold different-player equivalence is documented but
+            REJECTED unless a large corpus of genuine drafts later shows frequent collisions and a
+            full serial/parallel/resume/conditions/manager benchmark demonstrates a wall-clock win.
+            Use a separate 23×5 unique-player benchmark for ordinary 115-card performance estimates.
+
           IDEA 3 — FORCED-MOVE / SINGLETON FAST PATH (when a slot has exactly one unused-group
             candidate, commit without the candidate-loop + threshold machinery). Fires CONSTANTLY
             (forcedCommits ≈ 2000-6000 per few-hundred drafts). But NODE COUNT IS IDENTICAL
@@ -7431,7 +7455,8 @@ COUNT-CLEAN IS NOT MEMBERSHIP-CLEAN: Argentina previously reconciled at 477 only
 <!-- v5.22.0 — SBC TOP-END COVERAGE / SAFE SLOT-REVEAL TIEBREAK. SBC bounded pools now reserve a chemistry-aware frontier at every available rating and use a larger optimisation slice, preventing exclusions from revealing a strictly better maximum-card profile that was already legal. RTG/WL adds a post-solve-only legal-slot permutation check: when the same XI and manager remain exactly tied on every core metric and condition, it chooses the arrangement whose nation/league/team values are least identifying inside those position pools. The check is capped at 512 assignments and cannot alter search, pruning, chemistry, manager choice, or squad quality. Includes the two measured Showdown Plus additions from v5.21.0.1. -->
 <!-- v5.21.0.1 — DATA UPDATE. Added Quansah 95 Showdown Plus (Bayer Leverkusen, CB/RB, 57/95/95) and Grimaldo 95 Showdown Plus (Atletico Madrid, LM/LW/LB, 94/92/93). -->
 <!-- v5.24.1 — DOCUMENTATION ONLY: ACCEPTED 11-PICK CALIBRATION HORIZON. Section K now records why the no-hold helper calibrates on many 11-pick starting-XI scripts instead of simulating all 23 draft slots and solving every completed 115-offer board. The XI-only model can undervalue backup-only utility such as a second Icon, while the always-live starterBoost/benchPenalty adjustment partially compensates when that card truly improves the projected XI. This is an intentional sample-size/speed trade-off: a few exact full-draft samples are too slow and noisy for stable fitting. Hardcoded offline full-draft weights are rejected as DB-, pivot-, copy-, mix- and rules-dependent; huge offline runs remain useful only as occasional validation, not runtime truth. No logic, UI, solver or database data changed. -->
-<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.24.1</span></h1>
+<!-- v5.24.2 — RTG finalist navigation now hides only strict gameplay-identical model ties: identical post-chemistry/post-manager stat multisets plus identical model and rating tiebreak values. The highest-ranked representative remains visible, the UI/log reports retained versus unique counts, and the full finalist set is still searched, compared and available to the H2H tournament. Section S permanently rejects production same-hold card-equivalence compression on current evidence: the duplicate-heavy 115-card board is retained as a torture test, while a separate unique-player 23x5 benchmark should be used for realistic runtime. No Draft Solver search logic or DB data changed. -->
+<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.24.2</span></h1>
   <div class="cap sub">pacwyn optimiser</div>
   <div style="position:absolute;right:2px;top:40px;text-align:right;font-size:10px;line-height:1.5;color:var(--mut)">Created by <b style="color:var(--ink)">Chenzo</b><br><span style="opacity:.8">Special thanks to BWFCPackfan and Pacyswaz</span></div>
 </header>
@@ -11587,11 +11612,23 @@ function _testBetterState(a,b){if(!a)return false;if(!b)return true;if(a.mgr&&b.
 function _rtgSetResultFinalist(res,index){
   if(!res||!Array.isArray(res.finalists)||!res.finalists.length)return res;const n=res.finalists.length,raw=Math.round(Number(index)||0),i=((raw%n)+n)%n,f=res.finalists[i];if(!f||!f.state||!f.form)return res;res.finalistIndex=i;res.state=f.state;res.form=f.form;res.optimised=!!f.optimised;res.repair=f.repair||null;return res;
 }
+function _rtgUiFinalistSignature(row){
+  const state=row&&row.state,mgr=state&&state.mgr,metrics=mgr&&mgr.metrics||{},criteria=_RTG_CRITERIA_IDS.map(id=>id+':'+String(_testRtgMetricValue(mgr,id))).join('|');
+  return _rtgTournamentStatSignature(row)+'||'+criteria+'||obj:'+String(mgr&&mgr.obj)+'||wins:'+String(mgr&&mgr.expectedWins)+'||zc:'+String(mgr&&mgr.zeroChemCount)+'||lc:'+String(mgr&&mgr.lowChemCount)+'||raw:'+String(_testRtgRawRating(state))+'||sum:'+String(state&&state.ratingSum);
+}
+function _rtgVisibleFinalistMeta(res){
+  const raw=res&&Array.isArray(res.finalists)?res.finalists:[],rows=[],duplicates=[],seen=new Map();
+  for(let i=0;i<raw.length;i++){const row=raw[i];if(!row||!row.state||!row.form)continue;const signature=_rtgUiFinalistSignature(row),prior=seen.get(signature);if(prior){prior.duplicateRawIndexes.push(i);duplicates.push({rawIndex:i,representativeRawIndex:prior.rawIndex});continue;}const item={row,rawIndex:i,signature,duplicateRawIndexes:[]};seen.set(signature,item);rows.push(item);}
+  return {rawCount:raw.length,rows,duplicates,hiddenCount:duplicates.length};
+}
+function _rtgSetVisibleFinalist(res,index){
+  const meta=_rtgVisibleFinalistMeta(res);if(!meta.rows.length)return res;const n=meta.rows.length,raw=Math.round(Number(index)||0),i=((raw%n)+n)%n,item=meta.rows[i];res.finalistDisplayIndex=i;return _rtgSetResultFinalist(res,item.rawIndex);
+}
 function _rtgMergeFinalistResults(previous,current){
   if(!current||!current.state)return current;const limit=Math.max(1,_testRtgModelSettings().finalistCount||1),rows=[],seen=new Set(),add=(r)=>{if(!r||!r.state||!r.form)return;const sig=_testRtgStateSignature(r.state,r.form);if(seen.has(sig))return;seen.add(sig);rows.push({state:r.state,form:r.form,optimised:!!r.optimised,repair:r.repair||null});};
   for(const r of (current.finalists||[current]))add(r);for(const r of (previous&&previous.finalists||previous?[previous]:[]))add(r);rows.sort((a,b)=>_testRtgStateBetter(a.state,b.state)?-1:_testRtgStateBetter(b.state,a.state)?1:0);current.finalists=rows.slice(0,limit).map((r,i)=>Object.assign({rank:i+1},r));current.finalistIndex=0;return _rtgSetResultFinalist(current,0);
 }
-function changeRtgFinalist(delta){const res=_lastRtgTestResult;if(!res||!Array.isArray(res.finalists)||res.finalists.length<2)return;_rtgSetResultFinalist(res,(Number(res.finalistIndex)||0)+(Number(delta)||0));_renderTestResult(res,'rtg');saveLocal();}
+function changeRtgFinalist(delta){const res=_lastRtgTestResult,meta=_rtgVisibleFinalistMeta(res);if(!res||meta.rows.length<2)return;_rtgSetVisibleFinalist(res,(Number(res.finalistDisplayIndex)||0)+(Number(delta)||0));_renderTestResult(res,'rtg');saveLocal();}
 function _testPreviousResultCompatible(mode,res,conds,payload){
   if(!res||!res.state)return false;if(mode!=='rtg')return true;payload=payload||{};
   const rows=Array.isArray(res.finalists)&&res.finalists.length?res.finalists:[res],managerBlocked=new Set(payload.managerExcluded||[]),forcedManager=String(payload.rtgForceManagerKey||''),scope=payload.rtgFormationScope&&typeof payload.rtgFormationScope==='object'?payload.rtgFormationScope:null,noManagers=!!payload.rtgNoManagers;
@@ -11666,15 +11703,17 @@ function _renderTestResult(res,mode){
     else if(!cupsSetupError&&!cupsNoXI&&!rtgSetupError)html+=_testSearchButtons(mode,res);
     el.innerHTML=html;return;
   }
-  if(mode==='rtg')_rtgSetResultFinalist(res,Number(res.finalistIndex)||0);
-  const rtgFinalists=mode==='rtg'&&Array.isArray(res.finalists)?res.finalists:[],rtgFinalistIndex=rtgFinalists.length?Math.max(0,Math.min(rtgFinalists.length-1,Number(res.finalistIndex)||0)):0;
+  let rtgFinalistMeta={rawCount:0,rows:[],duplicates:[],hiddenCount:0};
+  if(mode==='rtg'){rtgFinalistMeta=_rtgVisibleFinalistMeta(res);let visibleIndex=Math.round(Number(res.finalistDisplayIndex));if(!Number.isFinite(visibleIndex)){const rawIndex=Math.max(0,Math.round(Number(res.finalistIndex)||0)),direct=rtgFinalistMeta.rows.findIndex(x=>x.rawIndex===rawIndex);visibleIndex=direct>=0?direct:0;}_rtgSetVisibleFinalist(res,visibleIndex);rtgFinalistMeta=_rtgVisibleFinalistMeta(res);}
+  const rtgFinalists=mode==='rtg'?rtgFinalistMeta.rows.map(x=>x.row):[],rtgFinalistIndex=rtgFinalists.length?Math.max(0,Math.min(rtgFinalists.length-1,Number(res.finalistDisplayIndex)||0)):0;
   const statMode=mode==='rtg'||mode==='cups'||mode==='cupsmgr',st=res.state,sc=st.sc,playerCount=st.pick.length,squadName=playerCount===11?'XI':playerCount+'-player squad',totalRating=st.pick.reduce((a,c)=>a+c.rating,0),exhaustive=!!(res.search&&!res.search.capped&&res.search.poolComplete&&(mode!=='rtg'||res.search.formsComplete)),oopSet=new Set(st.oopSlots||[]);
   const rtgLimited=mode==='rtg'&&res.search&&res.search.userFormationLimited,rtgModeLabel=_rtgModeShortLabel(),rtgWinnerTitle=rtgLimited?(exhaustive?'Best '+rtgModeLabel+' XI found from selected formations':'Best '+rtgModeLabel+' XI found so far from selected formations'):(exhaustive?'Best '+rtgModeLabel+' XI found':'Best '+rtgModeLabel+' XI found so far'),title=mode==='rtg'?(rtgFinalists.length>1&&rtgFinalistIndex>0?rtgModeLabel+' finalist '+(rtgFinalistIndex+1)+' of '+rtgFinalists.length:rtgWinnerTitle):mode==='cups'?(exhaustive?'Best pre-manager Draft Cups XI':'Best pre-manager Draft Cups XI so far'):mode==='cupsmgr'?(exhaustive?'Best XI from the fixed picks':'Best XI from the fixed picks so far'):repairMode?(exhaustive?'Minimum-change SBC repair found':'Minimum-change SBC repair found so far'):(exhaustive?'Lowest-ceiling valid '+squadName+' found':'Lowest-ceiling valid '+squadName+' found so far');
   if(mode==='sbc')_lastSbcTestResult=res;else if(repairMode)_lastSbcRepairResult=res;else if(mode==='rtg')_lastRtgTestResult=res;else if(mode==='cupsmgr')_lastCupsManagerResult=res;else _lastCupsTestResult=res;
   const exclusionControls=mode==='rtg'?$('#rtgExcludeControls'):(mode==='sbc'?$('#sbcExcludeControls'):(repairMode?$('#sbcRepairExcludeControls'):null));if(exclusionControls)exclusionControls.style.display='block';
   let html='<div class="summary"><div style="font-weight:800;color:var(--cyan)">'+title+'</div><div class="tiny">Formation '+(mode==='rtg'?'<span class="rtg-result-formation">'+esc(res.form.name)+'</span>':esc(res.form.name))+(playerCount<11?' · Players '+playerCount:'')+' · Team rating '+sc.rating+' · Chem '+sc.chem+(mode==='sbc'?' · Highest card '+Number(st.sbcMaxRating||Math.max(...st.pick.map(c=>Number(c.rating)||0)))+' · Rating profile '+_testSbcStateVector(st).join('/')+' · Sum '+totalRating:repairMode?' · Card-rating sum '+totalRating:'')+'</div>';
-  if(mode==='rtg'&&rtgFinalists.length>1)html+='<div class="rtg-finalist-nav" style="display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:8px;align-items:center;margin-top:9px;padding:8px;border:1px solid var(--cyan-dim);border-radius:10px;background:rgba(31,227,204,.05)"><button class="btn gho sm" type="button" aria-label="Previous finalist" onclick="changeRtgFinalist(-1)">&#8592;</button><div style="text-align:center"><b style="color:var(--cyan)">'+(rtgFinalistIndex===0?'Winning finalist':'Finalist '+(rtgFinalistIndex+1))+' · '+(rtgFinalistIndex+1)+'/'+rtgFinalists.length+'</b></div><button class="btn gho sm" type="button" aria-label="Next finalist" onclick="changeRtgFinalist(1)">&#8594;</button></div>';
-  if(mode==='rtg'&&rtgFinalists.length>1)html+=_rtgTournamentPanelHtml(res);
+  if(mode==='rtg'&&rtgFinalistMeta.hiddenCount)html+='<div class="note rtg-detail" style="margin-top:9px;border-color:var(--cyan-dim)"><b>'+rtgFinalistMeta.hiddenCount+' gameplay-identical tied finalist'+(rtgFinalistMeta.hiddenCount===1?' was':'s were')+' hidden.</b><br><span class="tiny">'+rtgFinalistMeta.rawCount+' retained finalists collapse to '+rtgFinalists.length+' unique team'+(rtgFinalists.length===1?'':'s')+' for result navigation. A duplicate is hidden only when its post-chemistry/post-manager stat multiset and every model/tiebreak value are identical; the highest-ranked copy represents that group. The solver still searched and compared the full retained set.</span></div>';
+  if(mode==='rtg'&&rtgFinalists.length>1)html+='<div class="rtg-finalist-nav" style="display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:8px;align-items:center;margin-top:9px;padding:8px;border:1px solid var(--cyan-dim);border-radius:10px;background:rgba(31,227,204,.05)"><button class="btn gho sm" type="button" aria-label="Previous finalist" onclick="changeRtgFinalist(-1)">&#8592;</button><div style="text-align:center"><b style="color:var(--cyan)">'+(rtgFinalistIndex===0?'Winning finalist':'Unique finalist '+(rtgFinalistIndex+1))+' · '+(rtgFinalistIndex+1)+'/'+rtgFinalists.length+'</b></div><button class="btn gho sm" type="button" aria-label="Next finalist" onclick="changeRtgFinalist(1)">&#8594;</button></div>';
+  if(mode==='rtg'&&rtgFinalistMeta.rawCount>1)html+=_rtgTournamentPanelHtml(res);
   if(mode==='cups')html+='<div class="note" style="margin-top:9px;border-color:var(--good)">No manager was assumed. The XI and every hold choice below are now locked as the players you actually picked before the manager offers appeared.</div>';
   if((mode==='cups'||mode==='cupsmgr')&&oopSet.size){const details=Array.from(oopSet).map(i=>esc((st.slots||res.form.slots)[i])+' → '+esc(st.pick[i].label)).join(' · '),minCount=Number(res.search&&res.search.oopMinimumCount)||oopSet.size,shape=esc((res.search&&res.search.oopRequiredPositions)||_draftCupSlotSummary(res.form,Array.from(oopSet)));html+='<div class="note" style="margin-top:9px;border-color:var(--warn);color:var(--warn)"><b>Minimum out-of-position fallback used.</b> A maximum natural matching proves that at least '+minCount+' slot'+(minCount===1?'':'s')+' must be OOP. To avoid wasting search time, Draft Cups searched one minimum-slot shape ('+shape+'), not every alternative minimum-OOP layout; this is the best result found for that chosen shape. '+details+'. OOP cards are fixed at 0 chemistry (−2) and take another −2 OOP penalty, for −4 before any independent manager stat boost.</div>'; }
   else if(mode==='cupsmgr')html+='<div class="note" style="margin-top:9px;border-color:var(--good)">Re-optimised using only the fixed picked-player pool. No earlier hold choice was changed.</div>';
@@ -11730,7 +11769,7 @@ function _testSolverLogText(mode){
   }
   lines.push('','Exclusions:');if((ex.cards||[]).length)lines.push('  Exact cards: '+ex.cards.join(', '));if((ex.managers||[]).length)lines.push('  Managers: '+ex.managers.join(', '));if(mode==='rtg'&&((ex.forcedPlayers||[]).length||ex.forcedManager)){lines.push('','Forced inputs:');for(const x of (ex.forcedPlayers||[]))lines.push('  Exact card: '+x);if(ex.forcedManager)lines.push('  Manager: '+ex.forcedManager);}const cf=ex.candidateFilters||null;if(cf&&Array.isArray(cf.cardTypes)&&cf.cardTypes.length)lines.push('  Card types: '+cf.cardTypes.join(', '));if(cf&&cf.excludeBelow)lines.push('  Ratings below '+cf.below+': excluded');if(cf&&cf.excludeAbove)lines.push('  Ratings above '+cf.above+': excluded');if(!(ex.cards||[]).length&&!(ex.managers||[]).length&&!(cf&&((cf.cardTypes||[]).length||cf.excludeBelow||cf.excludeAbove)))lines.push('  none');
   lines.push('','Search:','  Result formation: '+res.form.name);
-  if(mode==='rtg'&&Array.isArray(res.finalists)&&res.finalists.length>1)lines.push('  Displayed finalist: '+((Number(res.finalistIndex)||0)+1)+' / '+res.finalists.length+((Number(res.finalistIndex)||0)===0?' (winning finalist)':''));
+  if(mode==='rtg'&&Array.isArray(res.finalists)&&res.finalists.length>1){const fm=_rtgVisibleFinalistMeta(res),fi=Math.max(0,Math.min(fm.rows.length-1,Number(res.finalistDisplayIndex)||0));lines.push('  Displayed unique finalist: '+(fi+1)+' / '+fm.rows.length+(fi===0?' (winning finalist)':'')+(fm.hiddenCount?' · '+fm.hiddenCount+' gameplay-identical tied finalist'+(fm.hiddenCount===1?'':'s')+' hidden from '+fm.rawCount+' retained':' '));}
   if(q.stopped){lines.push('  Status: stopped by user','  DFS nodes before stop: '+Number(q.nodes||0).toLocaleString(),'  Phase when stopped: '+String(q.stopPhase||'Searching'),'  Formation being searched at stop: '+String(q.stopFormation||res.form.name),'  Latest valid incumbent retained: yes');}
   else{lines.push('  DFS nodes: '+Number(q.nodes||0).toLocaleString(),'  Search effort: ×'+Number(q.scale||1)+' cumulative','  Capped: '+(q.capped?'yes':'no'),'  Pool complete: '+(q.poolComplete?'yes':'no'));}
   if(mode==='rtg'&&!q.stopped){
