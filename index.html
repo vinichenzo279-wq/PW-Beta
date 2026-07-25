@@ -407,7 +407,7 @@
 <meta property="og:description" content="Pacwyn Solver">
 <!-- VERSION: bump this AND the matching v-number in the <h1><span> below on every patch, however
      small — see the longer note next to the <h1> for why this matters. -->
-<title>Pacwyn Solver v5.29.6</title>
+<title>Pacwyn Solver v5.29.7</title>
 <!-- ABOUT THIS APP / DATA SOURCE:
      This tool is for PACWYN, a game that heavily parallels EA FC but is NOT FC — it uses FC's
      real player cards as a base and adds its own exclusive cards on top. That's why FC data is a
@@ -432,6 +432,8 @@ h1,h2,h3{margin:0;font-weight:800;letter-spacing:.04em}
 header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,#06223a,#05080c);
   border-bottom:1px solid var(--line);padding:14px 16px 10px}
 header h1{font-size:19px;color:var(--cyan)}.cap.sub{color:var(--mut);font-size:11px;margin-top:2px;font-style:normal;letter-spacing:.12em}
+.headerCredits{max-width:100%;margin:7px auto 0;text-align:center;font-size:10px;line-height:1.45;color:var(--mut);overflow-wrap:anywhere}
+.headerCredits .thanks{display:block;opacity:.82;margin-top:1px}
 .wrap{padding:14px 12px}
 .tabbar{position:fixed;bottom:0;left:0;right:0;z-index:30;display:flex;overflow-x:auto;background:#070d14;border-top:1px solid var(--line);scrollbar-width:none}
 .tabbar::-webkit-scrollbar{display:none}
@@ -5637,6 +5639,17 @@ details.hlp p{font-size:12px;color:var(--mut);margin:8px 0 0;line-height:1.55}
           Rating, card type and apparent rarity are therefore useful broad heuristics at most — they
           are not an observable or stable price function.
 
+          Historical behaviour makes that instability concrete. Some traders deliberately kept an
+          exceptionally rare duplicate not because they wanted another copy, but because showing that
+          otherwise unseen card in a trade acted as a recognisable personal signature. Its negotiated
+          value therefore included identity and signalling value that no card-stat model could observe.
+          On another occasion, an entire collection was accidentally omitted from ordinary packs and
+          remained available only through limited-time picks. Those cards became effectively unpackable
+          for weeks and their trade value rose sharply even though the cards themselves had not changed.
+          Pacwyn appears to make availability mistakes like this much less often now, but the episode
+          demonstrates that hidden supply and developer deployment errors can dominate rating, type and
+          nominal rarity without leaving enough public data for a trustworthy tracker.
+
           PERMANENT PROJECT BOUNDARY
           This project MUST NOT attempt to estimate a card's live market value, publish a supposed
           coin price, infer a coins-to-GBP/EUR/USD conversion, or advise that a card is worth a real-
@@ -7774,9 +7787,10 @@ own displayed rating. Raw probability, Classic, Modern and exact H2H remain unch
 <!-- v5.29.4 — IMPORT DB-STAT WARNING / DECISION-FRAGILITY REPORT. Imported squads now warn when saved ATK/BAL/DEF values differ from the current database and continue using current DB values only after confirmation. Practical opportunities are split into largest punishments and easy-to-miss traps, with fragility ranked by how few available choices preserve perfect play and by non-obvious same-immediate-result mistakes. -->
 <!-- v5.29.5 — EXPANDABLE PRACTICAL LINES / CONFIGURABLE LIST DEPTH. The non-perfect-play opportunity report is now collapsed by default, lets the user choose how many suggestions to display per category (1–40), and gives every suggestion an expandable full 11-round line from the mistake through optimal punishment and continuation. Worker output retains a bounded pool of practical deviations so larger reports remain responsive. -->
 <!-- v5.29.6 — VERSION-STAMP CORRECTION. Corrected the visible header/runtime version that was accidentally left at v5.29.3 through the v5.29.4-v5.29.5 patches, restored the missing v5.29.4 changelog entry, and kept title/header/changelog aligned. No solver logic changed. -->
-<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.29.6</span></h1>
+<!-- v5.29.7 — CREDITS / MARKET-BOUNDARY DOCUMENTATION. Added PW_Alextrat to the centred Special Thanks line and moved the creator/credits block into normal header flow so it wraps without overlapping other header content on narrow screens. Expanded the future-maintainer no-price-model section with two real peer-to-peer examples: rare duplicates used as trader identity signals, and a collection accidentally omitted from packs that became effectively unpackable for weeks; notes that such availability mistakes appear much rarer now. No solver, database, OCR or scoring logic changed. -->
+<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.29.7</span></h1>
   <div class="cap sub">pacwyn optimiser</div>
-  <div style="position:absolute;right:2px;top:40px;text-align:right;font-size:10px;line-height:1.5;color:var(--mut)">Created by <b style="color:var(--ink)">Chenzo</b><br><span style="opacity:.8">Special thanks to BWFCPackfan and Pacyswaz</span></div>
+  <div class="headerCredits">Created by <b style="color:var(--ink)">Chenzo</b><span class="thanks">Special thanks to BWFCPackfan, Pacyswaz and PW_Alextrat</span></div>
 </header>
 <div id="versionResetNotice" class="note" style="display:none;margin:8px 12px;border-left-color:var(--warn);color:var(--warn)"></div>
 
