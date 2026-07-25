@@ -407,7 +407,7 @@
 <meta property="og:description" content="Pacwyn Solver">
 <!-- VERSION: bump this AND the matching v-number in the <h1><span> below on every patch, however
      small — see the longer note next to the <h1> for why this matters. -->
-<title>Pacwyn Solver v5.28.16</title>
+<title>Pacwyn Solver v5.28.17</title>
 <!-- ABOUT THIS APP / DATA SOURCE:
      This tool is for PACWYN, a game that heavily parallels EA FC but is NOT FC — it uses FC's
      real player cards as a base and adds its own exclusive cards on top. That's why FC data is a
@@ -685,6 +685,8 @@ details.hlp p{font-size:12px;color:var(--mut);margin:8px 0 0;line-height:1.55}
 
 .rtg-wl-multi-shell{width:100%;max-width:900px;margin:12px auto 0;padding:10px;border:1px solid var(--cyan-dim);border-radius:10px;background:rgba(31,227,204,.045);color:var(--ink);text-align:center}
 .rtg-wl-multi-shell>.tiny{max-width:760px;margin-left:auto;margin-right:auto}
+.rtg-wl-multi-mode{width:100%;max-width:520px;margin:9px auto 0;text-align:left}
+.rtg-wl-multi-mode label{margin-top:0}
 .rtg-wl-multi-controls{display:grid;grid-template-columns:minmax(140px,1fr) minmax(210px,1.35fr) minmax(140px,1fr);gap:8px;align-items:end;width:100%;max-width:760px;margin:9px auto 0}
 .rtg-wl-multi-controls>*{min-width:0}
 .rtg-wl-multi-controls .btn{width:100%}
@@ -7688,12 +7690,13 @@ comparison set and preserve the original result for return/navigation.
 -->
 <!--
 WL MULTI-TEAM OPTION POLICY — DO NOT REMOVE:
-The 3+1 Weekend League set builder is a separate optional search. It must never replace, rewrite,
-recalculate or silently alter the established one-team Classic/Modern result. The three core teams
-are chosen together from bounded ordinary-solver routes using real-person (name+pidx) disjointness
-and worst-team-first fairness under the selected priority order. The fourth reserve is solved only
-after the core is fixed and must not influence that core. No bounded set result is an exhaustiveness
-claim.
+The Weekend League multi-team builder is a separate optional search. It must never replace, rewrite,
+recalculate or silently alter the established one-team Classic/Modern result. Cross-team availability
+is player identity + exact card type; the same identity may reappear only on another type. Skip-fourth
+and leftover-reserve modes choose the three 10-match teams together with worst-team-first fairness.
+In leftover mode, team four is solved only after those three are fixed and must not influence them.
+Balanced-four mode deliberately compares and refines all four teams equally. No bounded set result is
+an exhaustiveness claim.
 -->
 <!--
 WL HIGH-RATING SAFETY POLICY — DO NOT REMOVE:
@@ -7711,6 +7714,7 @@ values used for candidate comparison, using the simple post-chemistry W/T/L reco
 own displayed rating. Raw probability, Classic, Modern and exact H2H remain unchanged.
 -->
 <!-- v5.28.11 — EDITABLE WL NUMERIC FIELDS. Fixed the new WL high-rating safety controls clamping and rewriting their values on every keystroke. Base-cap gap, higher-cap probe depth and correction threshold now allow blank and intermediate text while focused, then validate and clamp only when editing is committed on blur. This restores normal edits such as 90 -> blank/9 -> 95 or 105 without changing any solver, probability, cap or correction logic. -->
+<!-- v5.28.17 — OPTIONAL FOURTH-TEAM STRATEGY. Added three persisted WL multi-team modes: Skip fourth team maximises only the normal three 10-match teams; 3+1 from leftovers remains the default and builds team four only after the main three are fixed; Balance all four equally extends the bounded beam and replacement refinement across all four teams, so the fourth team shares the same worst-team-first objective. Updated progress, result cards, Live Play labels and text export for 3-team, leftover-reserve and balanced-four sets. Cross-team player-identity + exact-card-type availability, one-XI uniqueness, presets, scoring and ordinary one-team solves are unchanged. -->
 <!-- v5.28.16 — HIGHER-CAP FULL SEARCHES DEFAULT OFF. Changed the WL higher-cap search count from three to zero in the markup, runtime defaults and restore fallbacks. Added a one-time settings-default migration so existing installs carrying the old implicit depth of three also move to zero instead of silently retaining the expensive former default; later user changes persist normally. Renamed the visible controls to make clear that each entry launches another full search rather than a lightweight probe. The base WL safety cap remains default-on and unchanged. -->
 <!-- v5.28.15 — TRUE-CENTRED WL 3+1 CONTROLS / USER-FACING RUNTIME COPY. Made the effort selector and Stop button use equal outer grid tracks so the central Build 3+1 button is geometrically centred instead of being shifted by unequal side-column widths. The responsive two-column layout is also width-constrained. Removed Android/worker-route implementation details from the visible panel and replaced them with the practical warning that even ×1 can take 10 minutes or more, while retaining the pointer to the shared RTG advanced settings. No search, cancellation, scoring or availability logic changed. -->
 <!-- v5.28.14 — WL 3+1 ANDROID 80-SECOND DROP-OUT / TRUE STOP REPORTING. Split optional higher-cap and lower-rating probes into independent worker routes instead of nesting every probe inside one long ordinary-search worker, which caused repeatable Android/WebView drop-out around 80 seconds. Removed the redundant global cancellation flag so only the active run token can cancel a set search. The WL Stop button is now exempt from the global busy-input swallow and accepts only a trusted user event. Terminal stop/failure output is retained after cleanup, and only an actual Stop-button request is labelled as stopped; worker failures preserve their exact error instead of disappearing. No scoring, preset, card-availability or probability logic changed. -->
@@ -7733,7 +7737,7 @@ own displayed rating. Raw probability, Classic, Modern and exact H2H remain unch
 <!-- v5.27.27 — CLASSIC SEARCH TRANSPLANT / BENCHMARK VALIDATION BUILD. Classic now runs the complete v5.19 RTG search orchestration against the current database and current shared card, chemistry, manager and condition helpers; Modern remains the current pipeline. Added the transplanted function to the worker dependency closure and updated the selector description. -->
 <!-- v5.27.26 — RTG MODEL UI / LOG CLARITY. Reorganised the four compact model controls into a balanced 2×2 block (search model, finalist probability model, opponent benchmark, Top N) instead of leaving the probability selector stranded on its own row. Renamed the logged squad fingerprint to XI stat fingerprint and clarified that it hashes only the completed XI’s sorted post-chemistry ATK/BAL/DEF triples, not the player database. No search or probability logic changed. -->
 <!-- v5.27.25 — TRUE CLASSIC SEARCH PATH. Classic now restores the v5.19-era RTG search policy rather than only switching probability formulas: hard +3 outlier cap, condition-matched opponent sampling off, raw finalist scoring, no manager-guided or diversity expansion, one full-budget coordinated-repair seed, and no modern local-polish/squad-aware rerank. Modern remains unchanged. Added explicit search-path wording and kept Classic/Modern mutually exclusive. -->
-<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.28.16</span></h1>
+<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.28.17</span></h1>
   <div class="cap sub">pacwyn optimiser</div>
   <div style="position:absolute;right:2px;top:40px;text-align:right;font-size:10px;line-height:1.5;color:var(--mut)">Created by <b style="color:var(--ink)">Chenzo</b><br><span style="opacity:.8">Special thanks to BWFCPackfan and Pacyswaz</span></div>
 </header>
@@ -8271,8 +8275,17 @@ own displayed rating. Raw probability, Classic, Modern and exact H2H remain unch
         <div id="rtgWlHighRatingGuardStatus" class="tiny rtg-wl-high-guard-status"></div>
       </div>
       <div id="rtgWlMultiPanel" class="rtg-wl-multi-shell">
-        <b>Optional 3+1 same-type no-repeat WL set</b>
-        <div class="tiny" style="margin-top:4px">Jointly searches for <b>three core teams</b>, then builds a fourth reserve from whatever is left. The three core teams are compared worst-team first under your current team-building priority order, so one squad cannot win the set merely by consuming every elite card type. Across different teams, only the same <b>player identity + exact card type</b> is blocked: the same displayed name + pidx may appear again when its card type is different. A single XI still cannot contain the same real person twice. Managers may repeat.</div>
+        <b>Optional same-type no-repeat WL team set</b>
+        <div class="tiny" style="margin-top:4px">Builds the three teams used for the normal 30 matches. A fourth team is insurance for a draw: the draw does not count as a loss, but its players are used, so all three 10-match teams can be exhausted with one match still needed. Choose whether to skip that insurance team, build it only from leftovers, or let it influence allocation equally. Across teams, only the same <b>player identity + exact card type</b> is blocked; the same displayed name + pidx may appear again on a different card type. A single XI still cannot contain the same real person twice. Managers may repeat.</div>
+        <div class="rtg-wl-multi-mode">
+          <label>Fourth-team strategy
+            <select id="rtgWlMultiFourthMode" onchange="setRtgWlMultiFourthMode(this.value)">
+              <option value="skip">Skip fourth team · maximise the main three</option>
+              <option value="leftover" selected>3+1 · fourth team from leftovers (default)</option>
+              <option value="balanced">Balance all four teams equally</option>
+            </select>
+          </label>
+        </div>
         <div class="rtg-wl-multi-controls">
           <label>Joint search effort
             <select id="rtgWlMultiEffort" onchange="setRtgWlMultiEffort(this.value)">
@@ -8281,11 +8294,11 @@ own displayed rating. Raw probability, Classic, Modern and exact H2H remain unch
               <option value="9">×9 · 8-wide beam</option>
             </select>
           </label>
-          <button id="rtgWlMultiRunBtn" class="btn sec sm" type="button" data-test-action="1" onclick="runRtgWlMultiTeamSolver()">Build 3+1 WL teams</button>
+          <button id="rtgWlMultiRunBtn" class="btn sec sm" type="button" data-test-action="1" onclick="runRtgWlMultiTeamSolver()">Build WL teams</button>
           <button id="rtgWlMultiStopBtn" class="btn gho sm" type="button" onclick="stopRtgWlMultiTeamSolver(event)">Stop</button>
         </div>
         <div id="rtgWlMultiSettingsSummary" class="note" style="margin:8px auto 0;max-width:760px;text-align:left"></div>
-        <div class="tiny" style="margin-top:6px">An active <b>Team Rating · Min</b> is required. Even <b>×1</b> is a long search and can take <b>10 minutes or more</b>. The builder uses the current RTG/WL preset and team-building settings; change them lower down in this <b>RTG</b> tab under <b>Advanced — RTG / Draft Cups priorities</b>. It is a bounded search, so it may not prove the best possible 3+1 set.</div>
+        <div class="tiny" style="margin-top:6px">An active <b>Team Rating · Min</b> is required. Even <b>×1</b> is a long search and can take <b>10 minutes or more</b>. The builder uses the current RTG/WL preset and team-building settings; change them lower down in this <b>RTG</b> tab under <b>Advanced — RTG / Draft Cups priorities</b>. It is a bounded search, so it may not prove the best possible set.</div>
         <div id="rtgWlMultiOut" class="rtg-wl-multi-output"></div>
       </div>
     </div>
@@ -9266,7 +9279,7 @@ const _RTG_WL_MIN_KEY='pacwyn_rtg_wl_min_rating_v1';
 let RTG_WL_MODE=false,RTG_WL_MIN_RATING='';
 const _RTG_WL_MULTI_KEY='pacwyn_rtg_wl_multi_v1';
 const _RTG_WL_HIGH_GUARD_KEY='pacwyn_rtg_wl_high_guard_v1',_RTG_WL_HIGH_GUARD_DEFAULTS_VERSION=2;
-let RTG_WL_MULTI_EFFORT=1,_WL_MULTI_ACTIVE=null,_WL_MULTI_LAST=null,_WL_MULTI_TERMINAL_HTML='';
+let RTG_WL_MULTI_EFFORT=1,RTG_WL_MULTI_FOURTH_MODE='leftover',_WL_MULTI_ACTIVE=null,_WL_MULTI_LAST=null,_WL_MULTI_TERMINAL_HTML='';
 let RTG_WL_HIGH_GUARD_ENABLED=true,RTG_WL_HIGH_GUARD_GAP=4,RTG_WL_HIGH_GUARD_PROBE_DEPTH=0,RTG_WL_HIGH_GUARD_PROBE_EFFORT=1,RTG_WL_HIGH_RATING_CORRECTION_ENABLED=false,RTG_WL_HIGH_RATING_CORRECTION_THRESHOLD=95,_RTG_WL_HIGH_GUARD_LAST_META=null;
 const _RTG_CRITERIA_IDS=['balance','overperformance','win','scoregap','chemistry','coverage','axisdepth','rating'];
 const _RTG_CRITERIA_LABELS={balance:'Best-axis squad balance',overperformance:'Stat overperformance',win:'Modelled win probability',scoregap:'Expected round-score gap',chemistry:'Low-chem safety',coverage:'Second-axis / axis coverage',axisdepth:'Forced-axis depth',rating:'Team rating'};
@@ -9333,7 +9346,7 @@ function renderRtgModeUi(){
 }
 function setRtgWlMode(enabled){RTG_WL_MODE=!!enabled;_saveRtgWlMode();applyRtgModelPreset(RTG_WL_MODE?'win':'winfirst');renderRtgModeUi();if(typeof _toast==='function')_toast(RTG_WL_MODE?'Weekend League mode enabled · enter the current PACWYN WL minimum above.':'RTG mode restored · Win first preset selected.');}
 
-function _restoreRtgWlMultiSettings(){try{const raw=JSON.parse(localStorage.getItem(_RTG_WL_MULTI_KEY)||'{}'),n=Number(raw&&raw.effort);RTG_WL_MULTI_EFFORT=[1,3,9].includes(n)?n:1;}catch(e){RTG_WL_MULTI_EFFORT=1;}}
+function _restoreRtgWlMultiSettings(){try{const raw=JSON.parse(localStorage.getItem(_RTG_WL_MULTI_KEY)||'{}'),n=Number(raw&&raw.effort),mode=String(raw&&raw.fourthMode||'leftover');RTG_WL_MULTI_EFFORT=[1,3,9].includes(n)?n:1;RTG_WL_MULTI_FOURTH_MODE=['skip','leftover','balanced'].includes(mode)?mode:'leftover';}catch(e){RTG_WL_MULTI_EFFORT=1;RTG_WL_MULTI_FOURTH_MODE='leftover';}}
 function _restoreRtgWlHighRatingGuard(){
   try{
     const raw=JSON.parse(localStorage.getItem(_RTG_WL_HIGH_GUARD_KEY)||'{}'),gap=Math.round(Number(raw.gap)),depth=Math.round(Number(raw.depth)),effort=Number(raw.effort),threshold=Math.round(Number(raw.correctionThreshold)),currentDefaults=Number(raw.defaultsVersion)>=_RTG_WL_HIGH_GUARD_DEFAULTS_VERSION;
@@ -9370,12 +9383,14 @@ function renderRtgWlHighRatingGuardUi(){
   for(const el of [gap,depth,effort])if(el)el.disabled=!RTG_WL_HIGH_GUARD_ENABLED;if(threshold)threshold.disabled=!RTG_WL_HIGH_RATING_CORRECTION_ENABLED;
   if(status){const base=_testRtgPresetRatingConditions(_testConditionsForMode('rtg')),_old=_RTG_WL_HIGH_GUARD_LAST_META;_rtgApplyWlHighRatingGuard(base);const m=_RTG_WL_HIGH_GUARD_LAST_META,correction=RTG_WL_HIGH_RATING_CORRECTION_ENABLED?' Experimental ranking correction active from team rating '+RTG_WL_HIGH_RATING_CORRECTION_THRESHOLD+'; raw displayed percentages stay unchanged.':' Experimental ranking correction is off.';status.innerHTML=(m.applied?'<b style="color:var(--good)">Cap active:</b> ':'<b style="color:var(--warn)">Cap not currently applied:</b> ')+esc(m.reason||'')+esc(correction);_RTG_WL_HIGH_GUARD_LAST_META=_old;}
 }
-function _saveRtgWlMultiSettings(){try{localStorage.setItem(_RTG_WL_MULTI_KEY,JSON.stringify({effort:RTG_WL_MULTI_EFFORT}));}catch(e){}}
+function _saveRtgWlMultiSettings(){try{localStorage.setItem(_RTG_WL_MULTI_KEY,JSON.stringify({effort:RTG_WL_MULTI_EFFORT,fourthMode:RTG_WL_MULTI_FOURTH_MODE}));}catch(e){}}
 function setRtgWlMultiEffort(value){const n=Number(value);RTG_WL_MULTI_EFFORT=[1,3,9].includes(n)?n:1;_saveRtgWlMultiSettings();}
+function setRtgWlMultiFourthMode(value){RTG_WL_MULTI_FOURTH_MODE=['skip','leftover','balanced'].includes(String(value))?String(value):'leftover';_saveRtgWlMultiSettings();renderRtgWlMultiUi();}
+function _wlMultiModeLabel(mode){return mode==='skip'?'Skip fourth team':mode==='balanced'?'Balance all four equally':'3+1 from leftovers';}
 function renderRtgWlMultiUi(){
-  const panel=$('#rtgWlMultiPanel'),effort=$('#rtgWlMultiEffort'),out=$('#rtgWlMultiOut'),runBtn=$('#rtgWlMultiRunBtn'),stopBtn=$('#rtgWlMultiStopBtn'),summary=$('#rtgWlMultiSettingsSummary'),active=!!_WL_MULTI_ACTIVE,stopping=!!(_WL_MULTI_ACTIVE&&_WL_MULTI_ACTIVE.cancelled);
-  if(panel)panel.style.display=RTG_WL_MODE?'block':'none';if(effort){effort.value=String(RTG_WL_MULTI_EFFORT);effort.disabled=active;}if(runBtn)runBtn.disabled=active||_testSolverBusy;if(stopBtn){stopBtn.disabled=!active||stopping;stopBtn.textContent=stopping?'Stopping…':'Stop';stopBtn.style.opacity=active&&!stopping?'1':'.48';}
-  if(summary){const settings=_testRtgModelSettings(),preset=_rtgNamedPresetForSettings(settings),engine=settings.searchModel==='classic'?'Classic':'Modern';summary.innerHTML='<b>Current 3+1 settings:</b> '+esc(preset)+' preset · '+engine+' engine. Uses the current RTG/WL advanced settings selected lower down in this RTG tab.';}
+  const panel=$('#rtgWlMultiPanel'),effort=$('#rtgWlMultiEffort'),fourth=$('#rtgWlMultiFourthMode'),out=$('#rtgWlMultiOut'),runBtn=$('#rtgWlMultiRunBtn'),stopBtn=$('#rtgWlMultiStopBtn'),summary=$('#rtgWlMultiSettingsSummary'),active=!!_WL_MULTI_ACTIVE,stopping=!!(_WL_MULTI_ACTIVE&&_WL_MULTI_ACTIVE.cancelled),mode=RTG_WL_MULTI_FOURTH_MODE;
+  if(panel)panel.style.display=RTG_WL_MODE?'block':'none';if(effort){effort.value=String(RTG_WL_MULTI_EFFORT);effort.disabled=active;}if(fourth){fourth.value=mode;fourth.disabled=active;}if(runBtn){runBtn.disabled=active||_testSolverBusy;runBtn.textContent=mode==='skip'?'Build 3 WL teams':mode==='balanced'?'Build 4 balanced teams':'Build 3+1 WL teams';}if(stopBtn){stopBtn.disabled=!active||stopping;stopBtn.textContent=stopping?'Stopping…':'Stop';stopBtn.style.opacity=active&&!stopping?'1':'.48';}
+  if(summary){const settings=_testRtgModelSettings(),preset=_rtgNamedPresetForSettings(settings),engine=settings.searchModel==='classic'?'Classic':'Modern';summary.innerHTML='<b>Current set settings:</b> '+esc(preset)+' preset · '+engine+' engine · '+esc(_wlMultiModeLabel(mode))+'. Uses the current RTG/WL advanced settings selected lower down in this RTG tab.';}
   if(out&&!active)out.innerHTML=_WL_MULTI_LAST&&_WL_MULTI_LAST.html||_WL_MULTI_TERMINAL_HTML||'';
 }
 function _wlMultiEffortConfig(){
@@ -9476,56 +9491,81 @@ function _wlMultiMetricText(row){
 let _WL_MULTI_DISAMBIG_CACHE=null;
 function _wlMultiDisambiguationMap(){if(_WL_MULTI_DISAMBIG_CACHE)return _WL_MULTI_DISAMBIG_CACHE;const by=new Map();for(const c of _makeTestCards(1,'rtg')){const k=norm(c.label)+'|'+Number(c.rating),a=by.get(k)||[];a.push(c);by.set(k,a);}const out=new Map();for(const [k,a] of by){const people=new Set(a.map(_testPersonKey)),types=new Set(a.map(c=>norm(c.cardType||'')));out.set(k,{multiplePeople:people.size>1,multipleTypes:types.size>1});}_WL_MULTI_DISAMBIG_CACHE=out;return out;}
 function _wlMultiCardDisplayName(c){const info=_wlMultiDisambiguationMap().get(norm(c&&c.label)+'|'+Number(c&&c.rating))||{},parts=[String(c&&c.label||'Unknown')];if(c&&c.cardType)parts.push(String(c.cardType));if(info.multiplePeople)parts.push('identity '+(c&&c.pidx!=null?c.pidx:'base'));else if(info.multipleTypes&&!c.cardType&&c&&c._variantCount>1)parts.push('copy '+c._variant+'/'+c._variantCount);return parts.join(' · ');}
-function _wlMultiTeamCard(row,index,reserve){
-  if(!row)return '<div class="rtg-wl-team-card reserve"><h3>Reserve team unavailable</h3><div class="tiny">No fourth condition-valid XI was found from the remaining player-type pool at this effort.</div></div>';
-  const mgr=row.state&&row.state.mgr&&!row.state.mgr.noManager?_managerDisplayName(row.state.mgr,MANAGER_DB):'No manager',slots=row.form&&row.form.slots||[],players=(row.state.pick||[]).map((c,i)=>'<div class="wl-team-player"><span class="slot">'+esc(_liveSlotOccurrenceLabel(slots,i))+'</span><span class="name">'+esc(_wlMultiCardDisplayName(c))+'</span><span class="rating">'+Number(c.rating||0)+'</span></div>').join('');
-  return '<div class="rtg-wl-team-card '+(reserve?'reserve':'')+'"><h3>'+(reserve?'Reserve team 4':'Core team '+(index+1))+' · '+esc(row.form.name)+'</h3><div class="wl-team-meta">'+esc(_wlMultiMetricText(row))+'<br>Manager: '+esc(mgr)+'</div><div class="wl-team-xi">'+players+'</div><div class="rtg-wl-team-actions"><button class="btn sec sm" type="button" onclick="displayRtgWlMultiTeam('+(reserve?3:index)+')">Display as current XI</button><button class="btn gho sm" type="button" onclick="commitRtgWlMultiTeamToLive('+(reserve?3:index)+')">Commit to Live Play</button></div></div>';
+function _wlMultiTeamCard(row,index,mode){
+  const reserve=mode==='leftover'&&index===3;if(!row)return reserve?'<div class="rtg-wl-team-card reserve"><h3>Reserve team unavailable</h3><div class="tiny">No fourth condition-valid XI was found from the remaining player-type pool at this effort.</div></div>':'';
+  const mgr=row.state&&row.state.mgr&&!row.state.mgr.noManager?_managerDisplayName(row.state.mgr,MANAGER_DB):'No manager',slots=row.form&&row.form.slots||[],players=(row.state.pick||[]).map((c,i)=>'<div class="wl-team-player"><span class="slot">'+esc(_liveSlotOccurrenceLabel(slots,i))+'</span><span class="name">'+esc(_wlMultiCardDisplayName(c))+'</span><span class="rating">'+Number(c.rating||0)+'</span></div>').join(''),heading=reserve?'Reserve team 4':mode==='balanced'?'Balanced team '+(index+1):'Core team '+(index+1);
+  return '<div class="rtg-wl-team-card '+(reserve?'reserve':'')+'"><h3>'+heading+' · '+esc(row.form.name)+'</h3><div class="wl-team-meta">'+esc(_wlMultiMetricText(row))+'<br>Manager: '+esc(mgr)+'</div><div class="wl-team-xi">'+players+'</div><div class="rtg-wl-team-actions"><button class="btn sec sm" type="button" onclick="displayRtgWlMultiTeam('+index+')">Display as current XI</button><button class="btn gho sm" type="button" onclick="commitRtgWlMultiTeamToLive('+index+')">Commit to Live Play</button></div></div>';
 }
-function _wlMultiRenderResult(core,reserve,run){
-  const worst=_wlMultiWorstFirst(core)[0],all=core.concat(reserve?[reserve]:[]),availability=_wlMultiUnionAvailability(all),overlapFree=availability.size===all.reduce((n,r)=>n+(r.availability&&r.availability.size||0),0),html='<div class="note" style="border-color:var(--good)"><b>3-team WL core built'+(reserve?' with a fourth leftover reserve.':'.')+'</b><br><span class="tiny">Core selection maximised the worst team first under the current '+esc(_rtgNamedPresetForSettings(run.base.rtgModelSettings))+' priority order, then the second-worst and best teams. Core floor: '+esc(_wlMultiMetricText(worst))+'. '+(overlapFree?'No player identity + card-type combination overlaps across the displayed teams; the same person may reappear only on a different type.':'A same-player same-type overlap validation error was detected; do not use this set.')+' '+run.searches+' ordinary solver routes produced '+run.candidateRows.size+' distinct availability-set candidates. The search is bounded and does not prove the globally best disjoint set.</span><div class="row" style="margin-top:8px"><button class="btn sec sm" type="button" onclick="downloadRtgWlMultiSet()">Download 3+1 set</button><button class="btn gho sm" type="button" onclick="clearRtgWlMultiSet()">Clear set</button></div></div><div class="rtg-wl-multi-grid">'+core.map((r,i)=>_wlMultiTeamCard(r,i,false)).join('')+_wlMultiTeamCard(reserve,3,true)+'</div>';
-  _WL_MULTI_TERMINAL_HTML='';_WL_MULTI_LAST={core:core.slice(),reserve:reserve||null,html,runSettings:run.ctx.runSettings,conds:run.ctx.conds.slice(),seed:run.base.seed};const out=$('#rtgWlMultiOut');if(out)out.innerHTML=html;saveLocal();
+function _wlMultiRenderResult(teams,mode,run){
+  const compared=mode==='leftover'?teams.slice(0,3):teams.slice(),worst=_wlMultiWorstFirst(compared)[0],availability=_wlMultiUnionAvailability(teams),overlapFree=availability.size===teams.reduce((n,r)=>n+(r.availability&&r.availability.size||0),0),preset=esc(_rtgNamedPresetForSettings(run.base.rtgModelSettings));let title='',method='',download='';
+  if(mode==='skip'){title='Three-team WL set built.';method='Only the three normal 10-match teams influenced allocation; no fourth insurance team was built. The worst of the three was maximised first under the current '+preset+' priority order, then the second-worst and best teams.';download='Download 3-team set';}
+  else if(mode==='balanced'){title='Four equally balanced WL teams built.';method='All four teams influenced allocation equally. The worst of all four was maximised first under the current '+preset+' priority order, followed by the remaining teams in worst-to-best order.';download='Download balanced 4-team set';}
+  else{title='Three-team WL core built'+(teams[3]?' with a fourth leftover reserve.':'.');method='The first three teams were maximised worst-team first under the current '+preset+' priority order. Team four was then built only from the remaining player-type pool and did not weaken that core.';download='Download 3+1 set';}
+  const cards=teams.map((r,i)=>_wlMultiTeamCard(r,i,mode)).join('')+(mode==='leftover'&&!teams[3]?_wlMultiTeamCard(null,3,mode):''),html='<div class="note" style="border-color:var(--good)"><b>'+title+'</b><br><span class="tiny">'+method+' Compared-team floor: '+esc(_wlMultiMetricText(worst))+'. '+(overlapFree?'No player identity + card-type combination overlaps across the displayed teams; the same person may reappear only on a different type.':'A same-player same-type overlap validation error was detected; do not use this set.')+' '+run.searches+' ordinary solver routes produced '+run.candidateRows.size+' distinct availability-set candidates. The search is bounded and does not prove the globally best disjoint set.</span><div class="row" style="margin-top:8px"><button class="btn sec sm" type="button" onclick="downloadRtgWlMultiSet()">'+download+'</button><button class="btn gho sm" type="button" onclick="clearRtgWlMultiSet()">Clear set</button></div></div><div class="rtg-wl-multi-grid">'+cards+'</div>';
+  _WL_MULTI_TERMINAL_HTML='';_WL_MULTI_LAST={teams:teams.slice(),mode,core:teams.slice(0,3),reserve:mode==='leftover'&&teams[3]?teams[3]:null,html,runSettings:run.ctx.runSettings,conds:run.ctx.conds.slice(),seed:run.base.seed};const out=$('#rtgWlMultiOut');if(out)out.innerHTML=html;saveLocal();
 }
 async function runRtgWlMultiTeamSolver(){
   if(_TEST_ACTIVE_RUN||_WL_MULTI_ACTIVE)return;const out=$('#rtgWlMultiOut');
   if(!RTG_WL_MODE){if(out)out.innerHTML='<div class="note" style="border-color:var(--warn)">Enable Weekend League mode first.</div>';return;}
   const activeConds=_testRtgPresetRatingConditions(_testConditionsForMode('rtg')),wlMin=activeConds.find(c=>c&&c.kind==='team_rating'&&c.op==='gte');
-  if(!wlMin){if(out)out.innerHTML='<div class="note" style="border-color:var(--warn)"><b>Add and activate Team Rating · Min before building 3+1.</b><br><span class="tiny">Typing a value in Current WL minimum does not activate it by itself. Press Add / Update Minimum and make sure Conditions mode is active. The joint search was not started.</span></div>';return;}
+  if(!wlMin){if(out)out.innerHTML='<div class="note" style="border-color:var(--warn)"><b>Add and activate Team Rating · Min before building the WL team set.</b><br><span class="tiny">Typing a value in Current WL minimum does not activate it by itself. Press Add / Update Minimum and make sure Conditions mode is active. The joint search was not started.</span></div>';return;}
   const forcedExact=activeConds.filter(c=>c&&c.kind==='must_contain_card');
-  if(forcedExact.length){if(out)out.innerHTML='<div class="note" style="border-color:var(--warn)"><b>The 3+1 set cannot repeat a forced exact card.</b><br><span class="tiny">Remove forced exact-card Conditions or Force player in selections before this search. A required player identity Condition is allowed because different teams may use different card types of that person.</span></div>';return;}
-  const config=_wlMultiEffortConfig(),base=_testBuildWorkerPayload('rtg',1);if(base.error){if(out)out.innerHTML='<div class="note" style="border-color:var(--bad)">'+esc(base.error)+'</div>';return;}
-  const runSettings=_rtgRunSettingsSnapshot(base),ctx={conds:(base.conds||[]).slice(),runSettings,searchModel:String(base.rtgModelSettings&&base.rtgModelSettings.searchModel||'classic')},run={started:Date.now(),worker:null,rejectCurrent:null,base,config,ctx,cache:new Map(),candidateRows:new Map(),searches:0,cancelled:false};
+  if(forcedExact.length){if(out)out.innerHTML='<div class="note" style="border-color:var(--warn)"><b>The multi-team set cannot repeat a forced exact card.</b><br><span class="tiny">Remove forced exact-card Conditions or Force player in selections before this search. A required player identity Condition is allowed because different teams may use different card types of that person.</span></div>';return;}
+  const config=_wlMultiEffortConfig(),mode=RTG_WL_MULTI_FOURTH_MODE,base=_testBuildWorkerPayload('rtg',1);if(base.error){if(out)out.innerHTML='<div class="note" style="border-color:var(--bad)">'+esc(base.error)+'</div>';return;}
+  const runSettings=_rtgRunSettingsSnapshot(base),ctx={conds:(base.conds||[]).slice(),runSettings,searchModel:String(base.rtgModelSettings&&base.rtgModelSettings.searchModel||'classic')},run={started:Date.now(),worker:null,rejectCurrent:null,base,config,ctx,mode,cache:new Map(),candidateRows:new Map(),searches:0,cancelled:false};
   _WL_MULTI_LAST=null;_WL_MULTI_TERMINAL_HTML='';_WL_MULTI_ACTIVE=run;_setTestBusy(true);renderRtgWlMultiUi();
-  const cancelled=()=>run.cancelled||run!==_WL_MULTI_ACTIVE;
+  const cancelled=()=>run.cancelled||run!==_WL_MULTI_ACTIVE,totalStages=mode==='skip'?3:4;
   try{
-    _wlMultiDisplayProgress('Stage 1 of 4 · finding first-team candidates','Running the selected ordinary WL model with no additional player-type exclusions.');
-    const root=await _wlMultiSearchJob(new Set(),'Stage 1 of 4 · base candidate search');if(cancelled())throw new Error('cancelled');if(!root.rows.length)throw new Error(root.error||'No first-team candidate was found.');
+    _wlMultiDisplayProgress('Stage 1 of '+totalStages+' · finding first-team candidates','Running the selected ordinary WL model with no additional player-type exclusions.');
+    const root=await _wlMultiSearchJob(new Set(),'Stage 1 of '+totalStages+' · base candidate search');if(cancelled())throw new Error('cancelled');if(!root.rows.length)throw new Error(root.error||'No first-team candidate was found.');
     const singles=_wlMultiSelectDiverseRows(root.rows,config.beam),pairCombos=[];
     for(let i=0;i<singles.length;i++){
-      if(cancelled())throw new Error('cancelled');const a=singles[i],job=await _wlMultiSearchJob(a.availability,'Stage 2 of 4 · second-team route '+(i+1)+'/'+singles.length);if(cancelled())throw new Error('cancelled');
+      if(cancelled())throw new Error('cancelled');const a=singles[i],job=await _wlMultiSearchJob(a.availability,'Stage 2 of '+totalStages+' · second-team route '+(i+1)+'/'+singles.length);if(cancelled())throw new Error('cancelled');
       for(const b of job.rows)if(_wlMultiDisjoint(a,b))pairCombos.push({rows:[a,b]});
     }
     let pairs=_wlMultiBeam(pairCombos,config.beam);if(!pairs.length)throw new Error('No pair of condition-valid same-type-disjoint WL teams was found at this effort.');
     const tripleCombos=[];
     for(let i=0;i<pairs.length;i++){
-      if(cancelled())throw new Error('cancelled');const pair=pairs[i],used=_wlMultiUnionAvailability(pair.rows),job=await _wlMultiSearchJob(used,'Stage 3 of 4 · third-team route '+(i+1)+'/'+pairs.length);if(cancelled())throw new Error('cancelled');
+      if(cancelled())throw new Error('cancelled');const pair=pairs[i],used=_wlMultiUnionAvailability(pair.rows),job=await _wlMultiSearchJob(used,'Stage 3 of '+totalStages+' · third-team route '+(i+1)+'/'+pairs.length);if(cancelled())throw new Error('cancelled');
       for(const c of job.rows)if(pair.rows.every(r=>_wlMultiDisjoint(r,c)))tripleCombos.push({rows:pair.rows.concat(c)});
     }
     let triples=_wlMultiBeam(tripleCombos,config.beam);if(!triples.length)throw new Error('No three-team condition-valid same-type-disjoint WL core was found at this effort.');
-    let best=triples[0];
-    for(let pass=0;pass<config.refinePasses;pass++){
-      let changed=false;
-      for(let slot=0;slot<3;slot++){
-        if(cancelled())throw new Error('cancelled');const others=best.rows.filter((_,i)=>i!==slot),used=_wlMultiUnionAvailability(others),job=await _wlMultiSearchJob(used,'Balancing core · pass '+(pass+1)+'/'+config.refinePasses+' · team '+(slot+1)+'/3'),candidates=[best];if(cancelled())throw new Error('cancelled');
-        for(const row of job.rows)if(others.every(r=>_wlMultiDisjoint(r,row))){const rows=best.rows.slice();rows[slot]=row;candidates.push({rows});}
-        const next=_wlMultiBeam(candidates,1)[0];if(next&&_wlMultiSetBetter(next,best)){best=next;changed=true;}
+    let best;
+    if(mode==='balanced'){
+      const quadCombos=[];
+      for(let i=0;i<triples.length;i++){
+        if(cancelled())throw new Error('cancelled');const triple=triples[i],used=_wlMultiUnionAvailability(triple.rows),job=await _wlMultiSearchJob(used,'Stage 4 of 4 · fourth-team route '+(i+1)+'/'+triples.length);if(cancelled())throw new Error('cancelled');
+        for(const d of job.rows)if(triple.rows.every(r=>_wlMultiDisjoint(r,d)))quadCombos.push({rows:triple.rows.concat(d)});
       }
-      if(!changed)break;
+      const quads=_wlMultiBeam(quadCombos,config.beam);if(!quads.length)throw new Error('No four-team condition-valid same-type-disjoint WL set was found at this effort.');best=quads[0];
+      for(let pass=0;pass<config.refinePasses;pass++){
+        let changed=false;
+        for(let slot=0;slot<4;slot++){
+          if(cancelled())throw new Error('cancelled');const others=best.rows.filter((_,i)=>i!==slot),used=_wlMultiUnionAvailability(others),job=await _wlMultiSearchJob(used,'Balancing all four · pass '+(pass+1)+'/'+config.refinePasses+' · team '+(slot+1)+'/4'),candidates=[best];if(cancelled())throw new Error('cancelled');
+          for(const row of job.rows)if(others.every(r=>_wlMultiDisjoint(r,row))){const rows=best.rows.slice();rows[slot]=row;candidates.push({rows});}
+          const next=_wlMultiBeam(candidates,1)[0];if(next&&_wlMultiSetBetter(next,best)){best=next;changed=true;}
+        }
+        if(!changed)break;
+      }
+      _wlMultiRenderResult(best.rows.slice(),mode,run);
+    }else{
+      best=triples[0];
+      for(let pass=0;pass<config.refinePasses;pass++){
+        let changed=false;
+        for(let slot=0;slot<3;slot++){
+          if(cancelled())throw new Error('cancelled');const others=best.rows.filter((_,i)=>i!==slot),used=_wlMultiUnionAvailability(others),job=await _wlMultiSearchJob(used,'Balancing main three · pass '+(pass+1)+'/'+config.refinePasses+' · team '+(slot+1)+'/3'),candidates=[best];if(cancelled())throw new Error('cancelled');
+          for(const row of job.rows)if(others.every(r=>_wlMultiDisjoint(r,row))){const rows=best.rows.slice();rows[slot]=row;candidates.push({rows});}
+          const next=_wlMultiBeam(candidates,1)[0];if(next&&_wlMultiSetBetter(next,best)){best=next;changed=true;}
+        }
+        if(!changed)break;
+      }
+      if(cancelled())throw new Error('cancelled');const teams=best.rows.slice();
+      if(mode==='leftover'){const reserveJob=await _wlMultiSearchJob(_wlMultiUnionAvailability(teams),'Stage 4 of 4 · fourth reserve from the remaining player-type pool');if(cancelled())throw new Error('cancelled');if(reserveJob.rows[0])teams.push(reserveJob.rows[0]);}
+      _wlMultiRenderResult(teams,mode,run);
     }
-    if(cancelled())throw new Error('cancelled');const core=best.rows.slice(),reserveJob=await _wlMultiSearchJob(_wlMultiUnionAvailability(core),'Stage 4 of 4 · fourth reserve from the remaining player-type pool');if(cancelled())throw new Error('cancelled');const reserve=reserveJob.rows[0]||null;
-    _wlMultiRenderResult(core,reserve,run);
   }catch(e){
     const message=String(e&&e.message||e),stopped=!!run.cancelled;
-    _WL_MULTI_TERMINAL_HTML=stopped?'<div class="note" style="border-color:var(--warn)"><b>3+1 WL search stopped by the Stop button.</b><br><span class="tiny">The active worker and route sequence were cancelled. No partial set replaced the ordinary single-XI result.</span></div>':'<div class="note" style="border-color:var(--bad)"><b>3+1 WL search failed:</b> '+esc(message)+'<br><span class="tiny">This was not a Stop-button cancellation. The exact error is preserved here instead of being erased. Increase the joint effort, loosen Conditions, widen the formation scope or lower the required WL rating if the message reports no valid set.</span></div>';
+    _WL_MULTI_TERMINAL_HTML=stopped?'<div class="note" style="border-color:var(--warn)"><b>WL team-set search stopped by the Stop button.</b><br><span class="tiny">The active worker and route sequence were cancelled. No partial set replaced the ordinary single-XI result.</span></div>':'<div class="note" style="border-color:var(--bad)"><b>WL team-set search failed:</b> '+esc(message)+'<br><span class="tiny">This was not a Stop-button cancellation. Increase the joint effort, loosen Conditions, widen the formation scope or lower the required WL rating if the message reports no valid set.</span></div>';
     if(out)out.innerHTML=_WL_MULTI_TERMINAL_HTML;
   }finally{
     if(run.worker)try{run.worker.onmessage=null;run.worker.onerror=null;run.worker.terminate();}catch(_e){}run.worker=null;run.rejectCurrent=null;if(_WL_MULTI_ACTIVE===run)_WL_MULTI_ACTIVE=null;if(!_WL_MULTI_ACTIVE){_setTestBusy(false);renderRtgWlMultiUi();}
@@ -9534,20 +9574,21 @@ async function runRtgWlMultiTeamSolver(){
 function stopRtgWlMultiTeamSolver(ev){
   if(ev&&ev.isTrusted===false)return;const run=_WL_MULTI_ACTIVE;if(!run||run.cancelled)return;run.cancelled=true;run.stopRequestedAt=Date.now();const reject=run.rejectCurrent,worker=run.worker;run.rejectCurrent=null;run.worker=null;
   if(worker){try{worker.onmessage=null;worker.onerror=null;worker.terminate();}catch(e){}}
-  _WL_MULTI_TERMINAL_HTML='<div class="note" style="border-color:var(--warn)"><b>3+1 WL search stopped by the Stop button.</b><br><span class="tiny">The active worker was terminated immediately and no further route will start. No partial set can replace the ordinary single-XI result.</span></div>';const out=$('#rtgWlMultiOut');if(out)out.innerHTML=_WL_MULTI_TERMINAL_HTML;
+  _WL_MULTI_TERMINAL_HTML='<div class="note" style="border-color:var(--warn)"><b>WL team-set search stopped by the Stop button.</b><br><span class="tiny">The active worker was terminated immediately and no further route will start. No partial set can replace the ordinary single-XI result.</span></div>';const out=$('#rtgWlMultiOut');if(out)out.innerHTML=_WL_MULTI_TERMINAL_HTML;
   renderRtgWlMultiUi();if(reject){try{reject(new Error('cancelled'));}catch(e){}}else Promise.resolve().then(()=>{if(_WL_MULTI_ACTIVE===run&&run.rejectCurrent)try{run.rejectCurrent(new Error('cancelled'));}catch(e){}});
 }
+function _wlMultiStoredTeams(set){if(!set)return [];if(Array.isArray(set.teams))return set.teams;return (set.core||[]).concat(set.reserve?[set.reserve]:[]);}
 function displayRtgWlMultiTeam(index){
-  const set=_WL_MULTI_LAST,row=index===3?set&&set.reserve:set&&set.core&&set.core[index];if(!row)return;_lastRtgTestResult=_wlMultiRowAsResult(row);_renderTestResult(_lastRtgTestResult,'rtg');saveLocal();
+  const set=_WL_MULTI_LAST,row=_wlMultiStoredTeams(set)[index];if(!row)return;_lastRtgTestResult=_wlMultiRowAsResult(row);_renderTestResult(_lastRtgTestResult,'rtg');saveLocal();
 }
 function commitRtgWlMultiTeamToLive(index){
-  const set=_WL_MULTI_LAST,row=index===3?set&&set.reserve:set&&set.core&&set.core[index];if(!row)return;_commitTestResultToLivePlay(_wlMultiRowAsResult(row),index===3?'WL reserve team 4':'WL core team '+(index+1));
+  const set=_WL_MULTI_LAST,row=_wlMultiStoredTeams(set)[index],mode=set&&set.mode||'leftover';if(!row)return;const label=mode==='leftover'&&index===3?'WL reserve team 4':mode==='balanced'?'WL balanced team '+(index+1):'WL core team '+(index+1);_commitTestResultToLivePlay(_wlMultiRowAsResult(row),label);
 }
 function clearRtgWlMultiSet(){_WL_MULTI_LAST=null;const out=$('#rtgWlMultiOut');if(out)out.innerHTML='';}
 function downloadRtgWlMultiSet(){
-  const set=_WL_MULTI_LAST;if(!set)return;const rows=set.core.concat(set.reserve?[set.reserve]:[]),lines=['Pacwyn Solver '+_rtgCurrentAppVersion(),'Weekend League 3+1 same-type no-repeat set',''];
-  rows.forEach((row,i)=>{lines.push((i<3?'Core team '+(i+1):'Reserve team 4')+' · '+row.form.name,'  '+_wlMultiMetricText(row),'  Manager: '+(row.state.mgr&&!row.state.mgr.noManager?_managerDisplayName(row.state.mgr,MANAGER_DB):'No manager'));(row.state.pick||[]).forEach((c,j)=>lines.push('  '+_liveSlotOccurrenceLabel(row.form.slots,j)+': '+_wlMultiCardDisplayName(c)+' '+c.rating));lines.push('');});
-  const blob=new Blob([lines.join('\n')],{type:'text/plain'});_namedDownload(blob,'pacwyn-wl-3plus1-'+Date.now(),'txt');
+  const set=_WL_MULTI_LAST;if(!set)return;const rows=_wlMultiStoredTeams(set),mode=set.mode||'leftover',title=mode==='skip'?'Weekend League 3-team same-type no-repeat set':mode==='balanced'?'Weekend League balanced 4-team same-type no-repeat set':'Weekend League 3+1 same-type no-repeat set',stem=mode==='skip'?'pacwyn-wl-3team':mode==='balanced'?'pacwyn-wl-balanced4':'pacwyn-wl-3plus1',lines=['Pacwyn Solver '+_rtgCurrentAppVersion(),title,''];
+  rows.forEach((row,i)=>{const label=mode==='leftover'&&i===3?'Reserve team 4':mode==='balanced'?'Balanced team '+(i+1):'Core team '+(i+1);lines.push(label+' · '+row.form.name,'  '+_wlMultiMetricText(row),'  Manager: '+(row.state.mgr&&!row.state.mgr.noManager?_managerDisplayName(row.state.mgr,MANAGER_DB):'No manager'));(row.state.pick||[]).forEach((c,j)=>lines.push('  '+_liveSlotOccurrenceLabel(row.form.slots,j)+': '+_wlMultiCardDisplayName(c)+' '+c.rating));lines.push('');});
+  const blob=new Blob([lines.join('\n')],{type:'text/plain'});_namedDownload(blob,stem+'-'+Date.now(),'txt');
 }
 function renderRtgModelSettings(){
   const s=_normaliseRtgModelSettings(_RTG_MODEL_SETTINGS),preset=$('#rtgModelPreset');if(preset)preset.value=_RTG_MODEL_PRESETS[s.preset]?s.preset:'custom';const list=$('#rtgPriorityList');if(list)list.innerHTML=s.order.map((id,i)=>{const ratingChoice=id==='rating'?'<span class="rtg-rating-inline"><button id="rtgRatingLowerBtn" class="btn gho sm" type="button" onclick="event.stopPropagation();setRtgRatingDirection(\'lower\')">↓ Lower</button><button id="rtgRatingHigherBtn" class="btn gho sm" type="button" onclick="event.stopPropagation();setRtgRatingDirection(\'higher\')">↑ Higher</button></span>':'';return '<div class="rtg-priority-row'+(id==='rating'?' rating-row':'')+'"><span class="num">'+(i+1)+'</span><span class="label"><span>'+esc(id==='rating'?'Team rating':_rtgCriterionLabel(id,s))+'</span>'+ratingChoice+'</span><button class="btn gho sm" type="button" '+(i?'':'disabled')+' onclick="moveRtgPriority('+i+',-1)">↑</button><button class="btn gho sm" type="button" '+(i<s.order.length-1?'':'disabled')+' onclick="moveRtgPriority('+i+',1)">↓</button></div>';}).join('');
