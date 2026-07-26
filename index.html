@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ================================================================================================
-     PACWYN SOLVER v5.29.17 — RELEASE BUILD
+     PACWYN SOLVER v5.29.18 — RELEASE BUILD
      ================================================================================================
      This standalone release combines the Draft Solver, hard XI conditions, RTG/WL, Draft Cups,
      SBC, Live Play, formation/pivot analysis and the editable player/manager databases.
@@ -407,6 +407,25 @@
              • use exact home-and-away H2H to choose among finalists for a known opponent;
              • use Build to Beat when the fixed opponent itself is the optimisation target.
 
+
+         WL LEADERBOARD / MATCHMAKING LIMITATION:
+           - Do not use near-perfect public WL leaderboard totals as direct evidence that one legal squad
+             can naturally score 11-0 across almost every match. The solver does not observe PACWYN's live
+             matchmaking pool, whether an opponent was human or AI, which generated AI squads were faced,
+             who else was queueing at the time, or whether a player deliberately avoided other strong users.
+           - Historical reports also indicate that self-matching may be possible in some circumstances
+             despite the game attempting to prevent it. A player who controls both sides can intentionally
+             tank the second account and manufacture an 11-0 result. This cannot be detected or modelled from
+             the final leaderboard score alone.
+           - Therefore a result such as 329/330 rounds may depend on one or more external advantages:
+               • detailed knowledge of the AI squad generator and AI move policy;
+               • queue timing or knowledge of who is online, to favour AI rather than strong human opponents;
+               • self-matching and intentionally losing on the other account.
+           - These factors are outside the squad optimiser's scope. No squad-only probability model should be
+             calibrated to assume repeated 11-0 results unless the actual opponent-generation and matchmaking
+             environment is known. Treat leaderboard ceilings as potentially contaminated by matchmaking
+             control or exploits, not as a clean benchmark for ordinary WL squad strength.
+
          COPIED-SQUAD / DAILY-META WORKFLOW:
            - Probability remains necessary at the start of a day or condition set because exact H2H cannot
              optimise against opponents that have not yet been discovered. The broad model generates strong,
@@ -551,7 +570,7 @@
 <meta property="og:description" content="Pacwyn Solver">
 <!-- VERSION: bump this AND the matching v-number in the <h1><span> below on every patch, however
      small — see the longer note next to the <h1> for why this matters. -->
-<title>Pacwyn Solver v5.29.17</title>
+<title>Pacwyn Solver v5.29.18</title>
 <!-- ABOUT THIS APP / DATA SOURCE:
      This tool is for PACWYN, a game that heavily parallels EA FC but is NOT FC — it uses FC's
      real player cards as a base and adds its own exclusive cards on top. That's why FC data is a
@@ -8057,6 +8076,7 @@ own displayed rating. Raw probability, Classic, Modern and exact H2H remain unch
 <!-- v5.29.4 — IMPORT DB-STAT WARNING / DECISION-FRAGILITY REPORT. Imported squads now warn when saved ATK/BAL/DEF values differ from the current database and continue using current DB values only after confirmation. Practical opportunities are split into largest punishments and easy-to-miss traps, with fragility ranked by how few available choices preserve perfect play and by non-obvious same-immediate-result mistakes. -->
 <!-- v5.29.5 — EXPANDABLE PRACTICAL LINES / CONFIGURABLE LIST DEPTH. The non-perfect-play opportunity report is now collapsed by default, lets the user choose how many suggestions to display per category (1–40), and gives every suggestion an expandable full 11-round line from the mistake through optimal punishment and continuation. Worker output retains a bounded pool of practical deviations so larger reports remain responsive. -->
 <!-- v5.29.6 — VERSION-STAMP CORRECTION. Corrected the visible header/runtime version that was accidentally left at v5.29.3 through the v5.29.4-v5.29.5 patches, restored the missing v5.29.4 changelog entry, and kept title/header/changelog aligned. No solver logic changed. -->
+<!-- v5.29.18 — WL LEADERBOARD / MATCHMAKING LIMITATION DOCUMENTATION. Added a hidden maintainer note explaining that near-perfect WL leaderboard scores cannot be treated as clean squad-quality benchmarks because the solver cannot observe live queue population, human-versus-AI assignment, AI-generated opponent squads, queue timing/coordination, or possible self-matching and deliberate tanking on the second account. Recorded that repeated 11-0 results may require knowledge of AI generation/policy, knowledge of who is online, or control of both sides, and therefore must not be used to calibrate the ordinary WL probability model without the underlying matchmaking environment. No solver, evaluator, UI, database, tournament, H2H or Build-to-Beat logic changed. -->
 <!-- v5.29.17 — FINALIST H2H TOURNAMENT EXPORT / RTG LOG INTEGRATION. Completed optimal-play finalist tournaments now retain a compact raw report for the current finalist set: ranking mode, ordered standings, pair W-D-L, caller-leg losses, scored rounds, round shares, unbeaten/minimum-loss frontier, every home-and-away pair result, cache reuse and champion-versus-runner-up optimal traces. Added an Export tournament report button to completed tournament results. The ordinary RTG solver log now automatically appends the same tournament report whenever the completed tournament still matches the current retained finalists; stale or incomplete tournaments are never mixed into a newer solve. No tournament scoring, ranking, exact-H2H, solver, evaluator or database logic changed. -->
 <!-- v5.29.16 — DATABASE UPDATE: 2 FUTTIES + 8 PACWYN CHAMPIONS. Added measured cards only from the supplied screenshots and transfer confirmations. Futties: Mendy 97 Real Madrid (pidx 1, the Ferland Mendy identity) and Renato Sanches 96 Paris SG. Pacwyn Champions: Gordon 99 Barcelona; Goncalo Ramos 98 AC Milan; Hjulmand 97 Atletico Madrid; Zalazar 97 Sporting CP; Greenwood 96 Fenerbahce (pidx 1, Mason Greenwood); Van Hecke 95 Spurs; Esteve 94 RB Leipzig; Dragusin 94 Fiorentina. Preserved all photographed positions and ATK/BAL/DEF values. Mendy remains at Real Madrid; the other nine cards use their newly photographed clubs. No solver, evaluator, UI, manager or chemistry logic changed. -->
 <!-- v5.29.15 — OPTIONAL PATCH UI CLEANUP / SAFE SPEED-UPS DEFAULT ON. Rebuilt the audit-patch panel into two user-facing groups: compact Safe speed-ups and a collapsed Experimental result changes section. Replaced implementation-heavy descriptions with plain-language explanations, moved technical rationale into a closed note, nested draw-width and bound-patience inputs under their controlling switches, disabled those numeric controls while their parent test is off, and stopped inactive dependent values from triggering benchmark warnings. The result-identical DFS cache reuse and smaller worker payload switches now default on, remain individually reversible, and migrate on for existing v1 patch storage. Result-changing experiments still default off; outcome-prior scale remains at the established value of 1. The badge and warning now distinguish active result tests from safe speed-ups being disabled. No intended squad-ranking or evaluator change beyond adopting the two previously documented result-identical performance paths. -->
@@ -8067,7 +8087,7 @@ own displayed rating. Raw probability, Classic, Modern and exact H2H remain unch
 <!-- v5.29.11 — LA LIGA TARGET H2H / FIELD TOURNAMENT / +1-CAP FOLLOW-UP. Expanded the embedded 2026-07-26 benchmark with the exact target-specific and whole-field outcomes from the 26-finalist staged-outlier run: Del Bosque F3/F5 beat the stored Simeone target, while Simeone F1 lost that direct matchup but won the full home-and-away finalist tournament 46-4-0 for 142 points. Added the hard Team Rating +1 player-cap follow-up: Michels 4-1-2-1-2 F1 (75.263%) and its full XI beat the target 3-2 with six ties in both caller legs; F2 lost both legs and F4 managed only one draw. Documentation only; no solver, evaluator, database, tournament or H2H logic changed. -->
 <!-- v5.29.8 — LA LIGA 85 SEARCH-COVERAGE BENCHMARK. Added the 2026-07-26 legal Exact-85 / Min-81 / LaLiga-11 / Max-3-club / Min-9-nations reference XI to the embedded future-maintainer regression notes. Records the Simeone +1 Atletico three-axis core, full XI display stats, the v5.29.7 Classic evaluation (72.675% win, 9.274% draw, 18.051% loss; 6.640 expected duel points), the ordinary winner's 61.475% contrast, and classifies the failure as search/generation coverage because the evaluator strongly values the XI once supplied. No solver, database, OCR or scoring logic changed. -->
 <!-- v5.29.7 — CREDITS / MARKET-BOUNDARY DOCUMENTATION. Added PW_Alextrat to the centred Special Thanks line and moved the creator/credits block into normal header flow so it wraps without overlapping other header content on narrow screens. Expanded the future-maintainer no-price-model section with two real peer-to-peer examples: rare duplicates used as trader identity signals, and a collection accidentally omitted from packs that became effectively unpackable for weeks; notes that such availability mistakes appear much rarer now. No solver, database, OCR or scoring logic changed. -->
-<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.29.17</span></h1>
+<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.29.18</span></h1>
   <div class="cap sub">pacwyn optimiser</div>
   <div class="headerCredits">Created by <b style="color:var(--ink)">Chenzo</b><span class="thanks">Special thanks to BWFCPackfan, Pacyswaz and PW_Alextrat</span></div>
 </header>
