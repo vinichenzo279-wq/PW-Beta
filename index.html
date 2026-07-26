@@ -285,6 +285,81 @@
          5. Record whether the covering XI was the first displayed finalist, another retained finalist,
             or a promoted Quick-sub endpoint. This distinguishes search coverage from final H2H choice.
 
+       CURRENT LA LIGA 85 SEARCH-COVERAGE BENCHMARK — 2026-07-26:
+         Purpose:
+           - Distinguish a search/generation miss from a probability-evaluation miss under a restrictive
+             but legal fixture. The entered reference XI is rated much more highly by the same Classic
+             evaluator than any squad retained by the ordinary ×1 solve, yet the search did not produce it.
+
+         Conditions:
+           - Team Rating Exact 85; every player Min 81; Spain LaLiga cards Exact 11; cards from the same
+             club Max 3; different nations Min 9; chemistry 33.
+           - Classic model, Win-first preset, optimized opponent benchmark, all formations, Top N 5,
+             close-call 3%, rating-cap staging enabled and ordinary ×1 effort.
+
+         Reference XI:
+           - Formation 4-1-3-1-2; manager Simeone 91, +1 Atletico Madrid club.
+           - GK Aaron 85 (25/84/86).
+           - DEF Espino 86 (72/86/85), Hancko 86 after manager (70/85/87), Blind 86 (72/86/86),
+             Marcos Llorente 86 after manager (82/87/85).
+           - MID Rashford 86 (86/84/39), Kondogbia 86 (77/84/86), Antony 86 (85/83/50),
+             Guler 86 (86/83/60).
+           - ST Sorloth 86 after manager (87/84/39), Gerard Moreno 86 (87/83/51).
+           - The three Atletico boosts deliberately cover all three axes: Sorloth ATK 87,
+             Marcos Llorente BAL 87 and Hancko DEF 87.
+
+         v5.29.7 Classic evaluation:
+           - 72.675% win / 9.274% draw / 18.051% loss versus optimized same-rated squads.
+           - Expected duel points 6.640 / 11; expected score gap +2.280; simple benchmark 10 wins,
+             1 tie, 0 losses; exact raw team-rating tiebreak 85.967.
+           - At-rating depth ATK/BAL/DEF: 5/4/6; at rating +1: 4/3/4; usable depth: 6/11/6.
+
+         Ordinary-solve contrast:
+           - The same fixture's retained model winner was Del Bosque 4-1-2-1-2 at 61.475% win,
+             while the reference XI above was not retained. The solve searched only 6 of 27 feasible
+             role signatures and reached its 60-second optional repair ceiling.
+           - All five retained finalists failed to beat the reference XI in the field exact-H2H check.
+             Therefore this case is currently classified as a SEARCH / GENERATION COVERAGE benchmark,
+             not an evaluator-ranking benchmark: once the XI is supplied, the model values it correctly.
+           - Regression target: a normal supported search path should generate and retain this XI, or a
+             legal XI with an equal-or-better same-snapshot model score, without benchmark injection or
+             hardcoding. Preserve Simeone/Atletico manager-core coverage when changing manager dominance,
+             seeding, formation breadth, repair packages or finalist retention.
+
+         FOLLOW-UP FIELD RESULTS — MODERN, STAGED OUTLIERS, TOP-N 200 / 26 UNIQUE FINALISTS:
+           - The stored Simeone reference XI remained the fixed target for exact two-caller H2H.
+           - F3, a Del Bosque 4-5-1 at 65.133% model win, beat the target by one round in both
+             opening-caller legs. F5, another Del Bosque 4-5-1 at 63.639%, also beat it in both legs.
+           - F1, the Simeone 3-4-1-2 model winner at 69.131%, lost to the target by one round in both
+             legs, but won the complete 26-finalist home-and-away tournament: 46 wins, 4 draws, 0 losses,
+             142 points, with a 23-2-0 pair-caller record. F3 finished 44-5-1 for 137 points.
+           - This is intentional non-transitivity evidence rather than a ranking contradiction: F3 is the
+             stronger direct counter to this exact target, while F1 is the stronger general field squad.
+             Future reports must retain both facts instead of describing either XI as unconditionally best.
+
+         FOLLOW-UP HARD +1 PLAYER-CAP RESULT — MODERN, TOP-N 200 / 22 UNIQUE FINALISTS:
+           - Hard-capping player cards at Team Rating +1 removed every natural 87-88 card from the pool.
+             The search completed 6 of 27 feasible signatures, used all 18 optional repair routes, and
+             produced a new model winner at 75.263% win / 8.733% draw / 16.004% loss, 6.756 expected
+             duel points, 10 wins / 1 tie / 0 losses in the simple benchmark, raw rating 85.967.
+           - Direct-target winner: F1, Michels 98 in 4-1-2-1-2, beat the stored Simeone reference XI
+             by 3-2 with 6 tied rounds in BOTH opening-caller legs.
+           - F1 exact XI after manager boosts:
+             GK Aaron 85 (25/84/86); LB Hancko 86 (69/84/86); CB Blind 86 boosted by Michels
+             (73/87/87); CB Vitor Reis 86 (50/84/86); RB Foyth 85 (80/84/85); CDM Kondogbia 86
+             (77/84/86); LM Alvaro Carreras 86 (72/87/84); RM Guler 86 (86/83/60); CAM Gerard
+             Moreno 86 (87/83/51); ST Rashford 86 boosted by Michels (87/85/40); ST Sorloth 86
+             boosted by Michels (87/84/39).
+           - The +1-cap F2 at 74.973% still lost to the target by one round in both legs, demonstrating
+             again that a higher broad model score alone does not establish fixed-XI superiority.
+             F4 drew when it called first but lost when the target called first; every other +1-cap
+             retained finalist lost both legs.
+           - Interpretation: the +1 card cap did not recover the exact Simeone/Atletico target core, but
+             it did remove rating-expensive 87-88 outliers and found a legal squad that is BOTH evaluated
+             above the target (75.263% versus 72.675%) and beats it in exact optimal-play H2H. Treat this
+             as evidence that card-rating budget allocation materially changes search coverage, not as a
+             reason to make +1 a universal default without broader regression testing.
+
        INTERPRETATION / DESIGN CONTRACT:
          - Model win probability estimates broad performance against a distribution of condition-valid
            opponents. It is the candidate-generation and general-strength objective, not a promise that
@@ -407,7 +482,7 @@
 <meta property="og:description" content="Pacwyn Solver">
 <!-- VERSION: bump this AND the matching v-number in the <h1><span> below on every patch, however
      small — see the longer note next to the <h1> for why this matters. -->
-<title>Pacwyn Solver v5.29.7</title>
+<title>Pacwyn Solver v5.29.9</title>
 <!-- ABOUT THIS APP / DATA SOURCE:
      This tool is for PACWYN, a game that heavily parallels EA FC but is NOT FC — it uses FC's
      real player cards as a base and adds its own exclusive cards on top. That's why FC data is a
@@ -7787,8 +7862,10 @@ own displayed rating. Raw probability, Classic, Modern and exact H2H remain unch
 <!-- v5.29.4 — IMPORT DB-STAT WARNING / DECISION-FRAGILITY REPORT. Imported squads now warn when saved ATK/BAL/DEF values differ from the current database and continue using current DB values only after confirmation. Practical opportunities are split into largest punishments and easy-to-miss traps, with fragility ranked by how few available choices preserve perfect play and by non-obvious same-immediate-result mistakes. -->
 <!-- v5.29.5 — EXPANDABLE PRACTICAL LINES / CONFIGURABLE LIST DEPTH. The non-perfect-play opportunity report is now collapsed by default, lets the user choose how many suggestions to display per category (1–40), and gives every suggestion an expandable full 11-round line from the mistake through optimal punishment and continuation. Worker output retains a bounded pool of practical deviations so larger reports remain responsive. -->
 <!-- v5.29.6 — VERSION-STAMP CORRECTION. Corrected the visible header/runtime version that was accidentally left at v5.29.3 through the v5.29.4-v5.29.5 patches, restored the missing v5.29.4 changelog entry, and kept title/header/changelog aligned. No solver logic changed. -->
+<!-- v5.29.9 — LA LIGA TARGET H2H / FIELD TOURNAMENT / +1-CAP FOLLOW-UP. Expanded the embedded 2026-07-26 benchmark with the exact target-specific and whole-field outcomes from the 26-finalist staged-outlier run: Del Bosque F3/F5 beat the stored Simeone target, while Simeone F1 lost that direct matchup but won the full home-and-away finalist tournament 46-4-0 for 142 points. Added the hard Team Rating +1 player-cap follow-up: Michels 4-1-2-1-2 F1 (75.263%) and its full XI beat the target 3-2 with six ties in both caller legs; F2 lost both legs and F4 managed only one draw. Documentation only; no solver, evaluator, database, tournament or H2H logic changed. -->
+<!-- v5.29.8 — LA LIGA 85 SEARCH-COVERAGE BENCHMARK. Added the 2026-07-26 legal Exact-85 / Min-81 / LaLiga-11 / Max-3-club / Min-9-nations reference XI to the embedded future-maintainer regression notes. Records the Simeone +1 Atletico three-axis core, full XI display stats, the v5.29.7 Classic evaluation (72.675% win, 9.274% draw, 18.051% loss; 6.640 expected duel points), the ordinary winner's 61.475% contrast, and classifies the failure as search/generation coverage because the evaluator strongly values the XI once supplied. No solver, database, OCR or scoring logic changed. -->
 <!-- v5.29.7 — CREDITS / MARKET-BOUNDARY DOCUMENTATION. Added PW_Alextrat to the centred Special Thanks line and moved the creator/credits block into normal header flow so it wraps without overlapping other header content on narrow screens. Expanded the future-maintainer no-price-model section with two real peer-to-peer examples: rare duplicates used as trader identity signals, and a collection accidentally omitted from packs that became effectively unpackable for weeks; notes that such availability mistakes appear much rarer now. No solver, database, OCR or scoring logic changed. -->
-<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.29.7</span></h1>
+<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.29.9</span></h1>
   <div class="cap sub">pacwyn optimiser</div>
   <div class="headerCredits">Created by <b style="color:var(--ink)">Chenzo</b><span class="thanks">Special thanks to BWFCPackfan, Pacyswaz and PW_Alextrat</span></div>
 </header>
