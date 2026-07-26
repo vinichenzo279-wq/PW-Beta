@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ================================================================================================
-     PACWYN SOLVER v5.29.13 — RELEASE BUILD
+     PACWYN SOLVER v5.29.14 — RELEASE BUILD
      ================================================================================================
      This standalone release combines the Draft Solver, hard XI conditions, RTG/WL, Draft Cups,
      SBC, Live Play, formation/pivot analysis and the editable player/manager databases.
@@ -406,6 +406,22 @@
                legal parts of the squad space;
              • use exact home-and-away H2H to choose among finalists for a known opponent;
              • use Build to Beat when the fixed opponent itself is the optimisation target.
+
+         COPIED-SQUAD / DAILY-META WORKFLOW:
+           - Probability remains necessary at the start of a day or condition set because exact H2H cannot
+             optimise against opponents that have not yet been discovered. The broad model generates strong,
+             varied legal candidate squads and exposes multiple finalist families.
+           - Once a strong squad becomes public and many players copy it, the practical opponent distribution
+             becomes concentrated rather than abstract. Exact home-and-away H2H then becomes more valuable for
+             choosing among retained finalists, because the question has changed from "what is broadly strong?"
+             to "which of these strong squads beats the lineup I am likely to face?"
+           - Build to Beat is especially valuable against a copied daily meta squad: it directly optimises for
+             that known XI and can discover a decisive counter that ordinary broad-probability search would not
+             rank first or retain under default settings.
+           - These stages complement rather than replace one another: probability discovers candidates before
+             the meta exists; multiple finalists preserve strategic diversity; tournament/H2H selects a matchup
+             winner; Build to Beat attacks a dominant copied target once it exists.
+
          - Reporting contract: label model winner, finalist-tournament champion, fixed-target H2H winner
            and Build-to-Beat counter separately. Never describe one of them as unconditionally best, and
            never treat disagreement between them as automatic evidence of an evaluator bug.
@@ -535,7 +551,7 @@
 <meta property="og:description" content="Pacwyn Solver">
 <!-- VERSION: bump this AND the matching v-number in the <h1><span> below on every patch, however
      small — see the longer note next to the <h1> for why this matters. -->
-<title>Pacwyn Solver v5.29.13</title>
+<title>Pacwyn Solver v5.29.14</title>
 <!-- ABOUT THIS APP / DATA SOURCE:
      This tool is for PACWYN, a game that heavily parallels EA FC but is NOT FC — it uses FC's
      real player cards as a base and adds its own exclusive cards on top. That's why FC data is a
@@ -782,6 +798,52 @@ details.hlp p{font-size:12px;color:var(--mut);margin:8px 0 0;line-height:1.55}
 .h2h-opponent-config{width:100%;max-width:620px;margin:8px auto 0}
 .h2h-opponent-config>div{min-width:0}
 @media(max-width:520px){.h2h-opponent-config{flex-direction:column}}
+
+/* v5.29.14 — centre and stack the exact policy-tree explorer on narrow/split screens. */
+.h2h-policy-shell{width:100%;max-width:680px;margin:8px auto 0}
+.h2h-policy-controls{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  width:100%;
+  max-width:620px;
+  margin:8px auto 0;
+}
+.h2h-policy-controls>div{min-width:0}
+.h2h-policy-controls label{text-align:center}
+.h2h-policy-controls input,.h2h-policy-controls select{min-width:0;text-align:center}
+.h2h-policy-branch-note{width:100%;max-width:620px;margin:6px auto 0;text-align:center}
+.h2h-policy-move-controls{width:100%;max-width:520px;margin:8px auto 0}
+.h2h-policy-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  width:100%;
+  max-width:620px;
+  margin:8px auto 0;
+}
+.h2h-policy-actions .btn{
+  width:100%;
+  min-width:0;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.25;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+@media(max-width:560px){
+  .h2h-policy-shell{max-width:100%}
+  .h2h-policy-controls,
+  .h2h-policy-actions,
+  .h2h-policy-move-controls{max-width:360px}
+  .h2h-policy-controls,
+  .h2h-policy-actions{grid-template-columns:1fr}
+  .h2h-policy-move-controls label{text-align:center}
+  .h2h-policy-move-controls select,
+  .h2h-policy-move-controls input{text-align:center}
+}
 
 /* v1.5.0 — keep the on-demand RTG shortlist centred and prevent filter controls spanning the full viewport. */
 .rtg-best-shell{width:100%;max-width:760px;margin:0 auto}
@@ -7915,13 +7977,14 @@ own displayed rating. Raw probability, Classic, Modern and exact H2H remain unch
 <!-- v5.29.4 — IMPORT DB-STAT WARNING / DECISION-FRAGILITY REPORT. Imported squads now warn when saved ATK/BAL/DEF values differ from the current database and continue using current DB values only after confirmation. Practical opportunities are split into largest punishments and easy-to-miss traps, with fragility ranked by how few available choices preserve perfect play and by non-obvious same-immediate-result mistakes. -->
 <!-- v5.29.5 — EXPANDABLE PRACTICAL LINES / CONFIGURABLE LIST DEPTH. The non-perfect-play opportunity report is now collapsed by default, lets the user choose how many suggestions to display per category (1–40), and gives every suggestion an expandable full 11-round line from the mistake through optimal punishment and continuation. Worker output retains a bounded pool of practical deviations so larger reports remain responsive. -->
 <!-- v5.29.6 — VERSION-STAMP CORRECTION. Corrected the visible header/runtime version that was accidentally left at v5.29.3 through the v5.29.4-v5.29.5 patches, restored the missing v5.29.4 changelog entry, and kept title/header/changelog aligned. No solver logic changed. -->
+<!-- v5.29.14 — POLICY EXPLORER MOBILE ALIGNMENT / COPIED-META DOCUMENTATION. Replaced the exact policy-tree explorer's generic flex rows with centred responsive grids. The opening-caller, round and deviation controls now stack cleanly on narrow or split-screen viewports; branch controls are width-limited and centred; the four branch action buttons collapse to a centred single-column mobile layout instead of overflowing beyond the panel. Added the maintainer workflow explaining why broad probability search is required before candidate squads exist, while finalist H2H and Build to Beat become increasingly valuable once a strong daily squad is copied across the player base. No solver, evaluator, database, policy-tree or Build-to-Beat result logic changed. -->
 <!-- v5.29.13 — DOCUMENTATION ONLY: MULTI-OBJECTIVE RTG / H2H DESIGN CONTRACT. Consolidated the 2026-07-26 LaLiga-85 evidence showing that model-probability rank, whole-finalist-field tournament strength, direct fixed-target H2H strength, alternate-setting search results and dedicated Build-to-Beat strength are distinct objectives. Recorded the staged-outlier F1 field championship despite losing the target, staged F3/F5 direct target wins, hard +1-cap F1's 3-2 target win, and Build to Beat's exhaustive 7-4 counter. Formalised that multiple finalists, multiple models/settings, exact H2H and Build to Beat are intentional complementary paths rather than attempts to identify one unconditional 'true best' XI. No solver, evaluator, database, UI or H2H logic changed. -->
 <!-- v5.29.12 — BUILD-TO-BEAT POLICY BRANCH EXPLORER / LA LIGA BENCHMARK CONSOLIDATION. The exact fixed-XI worker now remains available after its exhaustive solve so the result panel can query any branch without dumping the 1,410,862-state policy tree. Choose either caller-order line, a round, and either a different caller card+axis or a different response card; the explorer shows the exact optimal continuation, projected final score, and supports further deviations later in the already-branched line. Changing an earlier round safely discards only downstream deviations. Consolidated the 2026-07-26 human target to its actual eleven-card 4-1-2-1-2, corrected Antony to rating 85, and documented the fully valid Del Bosque 4-3-2-1 Build-to-Beat counter that wins 7-4 with zero ties in both caller orders after all 1,410,862 reachable states. No player/manager database or ordinary RTG/WL objective changed. -->
 <!-- v5.29.11 — DOCUMENTATION/UI FIX ONLY. Removed the Rating Budget Utilisation regression note from the rendered RTG interface. The finding remains documented here for maintainers: in the exact-85 LaLiga benchmark, the winning +1-cap XI used 9×86 + 2×85 (Aaron and Foyth). A legal 10×86 + 1×85 alternative built by upgrading Foyth to Marcos Llorente and making the additional nation/club-validity changes performed worse in exact H2H. Therefore nominally unused rating capacity is not automatically wasted under restrictive conditions; optimise expected performance and axis distribution rather than forcing full rating-budget consumption. No solver, evaluator, database, tournament or H2H logic changed. -->
 <!-- v5.29.11 — LA LIGA TARGET H2H / FIELD TOURNAMENT / +1-CAP FOLLOW-UP. Expanded the embedded 2026-07-26 benchmark with the exact target-specific and whole-field outcomes from the 26-finalist staged-outlier run: Del Bosque F3/F5 beat the stored Simeone target, while Simeone F1 lost that direct matchup but won the full home-and-away finalist tournament 46-4-0 for 142 points. Added the hard Team Rating +1 player-cap follow-up: Michels 4-1-2-1-2 F1 (75.263%) and its full XI beat the target 3-2 with six ties in both caller legs; F2 lost both legs and F4 managed only one draw. Documentation only; no solver, evaluator, database, tournament or H2H logic changed. -->
 <!-- v5.29.8 — LA LIGA 85 SEARCH-COVERAGE BENCHMARK. Added the 2026-07-26 legal Exact-85 / Min-81 / LaLiga-11 / Max-3-club / Min-9-nations reference XI to the embedded future-maintainer regression notes. Records the Simeone +1 Atletico three-axis core, full XI display stats, the v5.29.7 Classic evaluation (72.675% win, 9.274% draw, 18.051% loss; 6.640 expected duel points), the ordinary winner's 61.475% contrast, and classifies the failure as search/generation coverage because the evaluator strongly values the XI once supplied. No solver, database, OCR or scoring logic changed. -->
 <!-- v5.29.7 — CREDITS / MARKET-BOUNDARY DOCUMENTATION. Added PW_Alextrat to the centred Special Thanks line and moved the creator/credits block into normal header flow so it wraps without overlapping other header content on narrow screens. Expanded the future-maintainer no-price-model section with two real peer-to-peer examples: rare duplicates used as trader identity signals, and a collection accidentally omitted from packs that became effectively unpackable for weeks; notes that such availability mistakes appear much rarer now. No solver, database, OCR or scoring logic changed. -->
-<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.29.13</span></h1>
+<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.29.14</span></h1>
   <div class="cap sub">pacwyn optimiser</div>
   <div class="headerCredits">Created by <b style="color:var(--ink)">Chenzo</b><span class="thanks">Special thanks to BWFCPackfan, Pacyswaz and PW_Alextrat</span></div>
 </header>
@@ -13586,7 +13649,7 @@ function _h2hPolicySetRound(v){if(!_H2H_POLICY_BRANCH)return;_H2H_POLICY_BRANCH.
 function _h2hPolicySetMode(v){if(!_H2H_POLICY_BRANCH)return;_H2H_POLICY_BRANCH.mode=v==='response'?'response':'call';_h2hRenderPolicyExplorer();}
 function _h2hPolicyRemaining(step,side){const b=_H2H_POLICY_BRANCH,c=_H2H_POLICY_CONTEXT,used=new Set();for(const z of (b&&b.trace||[]).slice(0,Math.max(0,step-1)))used.add(side==='own'?Number(z.ui):Number(z.oi));const list=side==='own'?c.ownLabels:c.oppLabels;return list.map((label,i)=>({i,label})).filter(x=>!used.has(x.i));}
 function _h2hPolicyChoiceLabel(side,i){const c=_H2H_POLICY_CONTEXT,stats=side==='own'?c.own:c.opp,labels=side==='own'?c.ownLabels:c.oppLabels,x=stats[i]||[];return (labels[i]||((side==='own'?'Your':'Opponent')+' card '+(i+1)))+' · '+x[0]+'/'+x[1]+'/'+x[2];}
-function _h2hRenderPolicyExplorer(){const el=$('#h2hPolicyExplorer'),c=_H2H_POLICY_CONTEXT,b=_H2H_POLICY_BRANCH;if(!el)return;if(!c||!b){el.innerHTML='';return;}const tr=b.trace||[],round=Math.max(1,Math.min(tr.length||11,Number(b.round)||1)),z=tr[round-1]||{},turn=Number(z.turn)===1?1:0,mode=b.mode==='response'?'response':'call',callerSide=turn?'opp':'own',responseSide=turn?'own':'opp',caller=_h2hPolicyRemaining(round,callerSide),response=_h2hPolicyRemaining(round,responseSide),axis=['ATK','BAL','DEF'],optCaller=turn?Number(z.oi):Number(z.ui),optResponse=turn?Number(z.ui):Number(z.oi),optAxis=Number(z.a)||0,fmt=x=>Math.abs(Number(x)||0)<.0005?'0':Number(x).toFixed(0),devs=(b.deviations||[]).map(d=>'R'+d.step+' '+(d.mode==='call'?'caller':'response')).join(' → ')||'none';let controls='';if(mode==='call'){controls='<div><label>'+(turn?'Opponent caller card':'Your caller card')+'</label><select id="h2hPolicyCard">'+caller.map(x=>'<option value="'+x.i+'" '+(x.i===optCaller?'selected':'')+'>'+esc(_h2hPolicyChoiceLabel(callerSide,x.i))+'</option>').join('')+'</select></div><div><label>Called axis</label><select id="h2hPolicyAxis">'+axis.map((x,i)=>'<option value="'+i+'" '+(i===optAxis?'selected':'')+'>'+x+'</option>').join('')+'</select></div><div class="tiny">The other side answers optimally from the selected call.</div>';}else{controls='<div class="note" style="margin:0"><b>Keep the current call:</b> '+esc(_h2hPolicyChoiceLabel(callerSide,optCaller))+' '+axis[optAxis]+'</div><div><label>'+(turn?'Your response card':'Opponent response card')+'</label><select id="h2hPolicyCard">'+response.map(x=>'<option value="'+x.i+'" '+(x.i===optResponse?'selected':'')+'>'+esc(_h2hPolicyChoiceLabel(responseSide,x.i))+'</option>').join('')+'</select></div><input id="h2hPolicyAxis" type="hidden" value="'+optAxis+'">';}const score=b.score||{},converted=_h2hPvToTrace(tr,c.own,c.opp,c.ownLabels,c.oppLabels);el.innerHTML='<details class="hlp" open><summary>Explore any exact policy-tree branch</summary><div class="note" style="margin-top:7px"><b>Projected branch finish: '+fmt(score.us)+'–'+fmt(score.them)+'</b> with '+fmt(score.ties)+' ties.<br><span class="tiny">Choose a round and force either the caller move or the response. Earlier deviations remain active; changing an earlier round discards only later deviations. The exhaustive worker reuses its solved state table, so no million-state tree is dumped or recalculated.</span></div><div class="row" style="margin-top:8px"><div><label>Opening caller</label><select onchange="_h2hPolicySetFirst(this.value)"><option value="0" '+(!b.first?'selected':'')+'>You call first</option><option value="1" '+(b.first?'selected':'')+'>Opponent calls first</option></select></div><div><label>Branch at round</label><input type="number" min="1" max="11" value="'+round+'" onchange="_h2hPolicySetRound(this.value)"></div><div><label>Deviation type</label><select onchange="_h2hPolicySetMode(this.value)"><option value="call" '+(mode==='call'?'selected':'')+'>Different caller card + axis</option><option value="response" '+(mode==='response'?'selected':'')+'>Different response card</option></select></div></div><div class="tiny" style="margin-top:6px"><b>Current branch deviations:</b> '+esc(devs)+'</div><div class="h2h-opponent-config" style="margin-top:8px">'+controls+'</div><div class="row" style="margin-top:8px"><button class="btn sec sm" type="button" onclick="_h2hPolicyApply()" '+(_H2H_POLICY_PENDING?'disabled':'')+'>'+(_H2H_POLICY_PENDING?'Evaluating branch…':'Apply / replace deviation')+'</button><button class="btn gho sm" type="button" onclick="_h2hPolicyTrim()">Remove this and later deviations</button><button class="btn gho sm" type="button" onclick="_h2hPolicySetFirst('+b.first+')">Reset branch</button><button class="btn gho sm" type="button" onclick="_h2hPolicyRelease()">Release tree memory</button></div><div id="h2hPolicyError" class="tiny" style="color:var(--warn);margin-top:6px"></div><details class="hlp" style="margin-top:8px"><summary>Full optimal continuation from this branch</summary>'+_h2hTraceHtml(converted,score)+'</details></details>';}
+function _h2hRenderPolicyExplorer(){const el=$('#h2hPolicyExplorer'),c=_H2H_POLICY_CONTEXT,b=_H2H_POLICY_BRANCH;if(!el)return;if(!c||!b){el.innerHTML='';return;}const tr=b.trace||[],round=Math.max(1,Math.min(tr.length||11,Number(b.round)||1)),z=tr[round-1]||{},turn=Number(z.turn)===1?1:0,mode=b.mode==='response'?'response':'call',callerSide=turn?'opp':'own',responseSide=turn?'own':'opp',caller=_h2hPolicyRemaining(round,callerSide),response=_h2hPolicyRemaining(round,responseSide),axis=['ATK','BAL','DEF'],optCaller=turn?Number(z.oi):Number(z.ui),optResponse=turn?Number(z.ui):Number(z.oi),optAxis=Number(z.a)||0,fmt=x=>Math.abs(Number(x)||0)<.0005?'0':Number(x).toFixed(0),devs=(b.deviations||[]).map(d=>'R'+d.step+' '+(d.mode==='call'?'caller':'response')).join(' → ')||'none';let controls='';if(mode==='call'){controls='<div><label>'+(turn?'Opponent caller card':'Your caller card')+'</label><select id="h2hPolicyCard">'+caller.map(x=>'<option value="'+x.i+'" '+(x.i===optCaller?'selected':'')+'>'+esc(_h2hPolicyChoiceLabel(callerSide,x.i))+'</option>').join('')+'</select></div><div><label>Called axis</label><select id="h2hPolicyAxis">'+axis.map((x,i)=>'<option value="'+i+'" '+(i===optAxis?'selected':'')+'>'+x+'</option>').join('')+'</select></div><div class="tiny">The other side answers optimally from the selected call.</div>';}else{controls='<div class="note" style="margin:0"><b>Keep the current call:</b> '+esc(_h2hPolicyChoiceLabel(callerSide,optCaller))+' '+axis[optAxis]+'</div><div><label>'+(turn?'Your response card':'Opponent response card')+'</label><select id="h2hPolicyCard">'+response.map(x=>'<option value="'+x.i+'" '+(x.i===optResponse?'selected':'')+'>'+esc(_h2hPolicyChoiceLabel(responseSide,x.i))+'</option>').join('')+'</select></div><input id="h2hPolicyAxis" type="hidden" value="'+optAxis+'">';}const score=b.score||{},converted=_h2hPvToTrace(tr,c.own,c.opp,c.ownLabels,c.oppLabels);el.innerHTML='<details class="hlp h2h-policy-shell" open><summary>Explore any exact policy-tree branch</summary><div class="note" style="margin-top:7px"><b>Projected branch finish: '+fmt(score.us)+'–'+fmt(score.them)+'</b> with '+fmt(score.ties)+' ties.<br><span class="tiny">Choose a round and force either the caller move or the response. Earlier deviations remain active; changing an earlier round discards only later deviations. The exhaustive worker reuses its solved state table, so no million-state tree is dumped or recalculated.</span></div><div class="h2h-policy-controls"><div><label>Opening caller</label><select onchange="_h2hPolicySetFirst(this.value)"><option value="0" '+(!b.first?'selected':'')+'>You call first</option><option value="1" '+(b.first?'selected':'')+'>Opponent calls first</option></select></div><div><label>Branch at round</label><input type="number" min="1" max="11" value="'+round+'" onchange="_h2hPolicySetRound(this.value)"></div><div><label>Deviation type</label><select onchange="_h2hPolicySetMode(this.value)"><option value="call" '+(mode==='call'?'selected':'')+'>Different caller card + axis</option><option value="response" '+(mode==='response'?'selected':'')+'>Different response card</option></select></div></div><div class="tiny h2h-policy-branch-note"><b>Current branch deviations:</b> '+esc(devs)+'</div><div class="h2h-opponent-config h2h-policy-move-controls">'+controls+'</div><div class="h2h-policy-actions"><button class="btn sec sm" type="button" onclick="_h2hPolicyApply()" '+(_H2H_POLICY_PENDING?'disabled':'')+'>'+(_H2H_POLICY_PENDING?'Evaluating branch…':'Apply / replace deviation')+'</button><button class="btn gho sm" type="button" onclick="_h2hPolicyTrim()">Remove this and later deviations</button><button class="btn gho sm" type="button" onclick="_h2hPolicySetFirst('+b.first+')">Reset branch</button><button class="btn gho sm" type="button" onclick="_h2hPolicyRelease()">Release tree memory</button></div><div id="h2hPolicyError" class="tiny" style="color:var(--warn);margin-top:6px"></div><details class="hlp" style="margin-top:8px"><summary>Full optimal continuation from this branch</summary>'+_h2hTraceHtml(converted,score)+'</details></details>';}
 function _h2hPolicyApply(){const c=_H2H_POLICY_CONTEXT,b=_H2H_POLICY_BRANCH;if(!c||!b||!_H2H_POLICY_WORKER||_H2H_POLICY_PENDING)return;const round=Math.max(1,Math.min(11,Math.round(Number(b.round)||1))),mode=b.mode==='response'?'response':'call',card=Math.round(Number(($('#h2hPolicyCard')||{}).value)),axis=Math.round(Number(($('#h2hPolicyAxis')||{}).value));if(!Number.isInteger(card)||!Number.isInteger(axis)){const er=$('#h2hPolicyError');if(er)er.textContent='Choose a card and axis.';return;}const deviations=(b.deviations||[]).filter(d=>Number(d.step)<round);deviations.push({step:round,mode,card,axis});_H2H_POLICY_PENDING=true;b.deviations=deviations;_h2hRenderPolicyExplorer();const id=++_H2H_POLICY_QUERY_ID;_H2H_POLICY_WORKER.postMessage({kind:'query',id,first:b.first,deviations});}
 function _h2hPolicyTrim(){const b=_H2H_POLICY_BRANCH;if(!b)return;const round=Math.max(1,Math.min(11,Math.round(Number(b.round)||1))),deviations=(b.deviations||[]).filter(d=>Number(d.step)<round);if(!deviations.length){_h2hPolicySetFirst(b.first);return;}_H2H_POLICY_PENDING=true;b.deviations=deviations;_h2hRenderPolicyExplorer();const id=++_H2H_POLICY_QUERY_ID;_H2H_POLICY_WORKER.postMessage({kind:'query',id,first:b.first,deviations});}
 function _h2hPolicyReceive(m){if(!m||!m.query)return;_H2H_POLICY_PENDING=false;const er=$('#h2hPolicyError');if(m.error){if(er)er.textContent=String(m.error).split('\n')[0];_h2hRenderPolicyExplorer();const er2=$('#h2hPolicyError');if(er2)er2.textContent=String(m.error).split('\n')[0];return;}if(!_H2H_POLICY_BRANCH)return;_H2H_POLICY_BRANCH.deviations=Array.isArray(m.deviations)?m.deviations:_H2H_POLICY_BRANCH.deviations;_H2H_POLICY_BRANCH.trace=Array.isArray(m.trace)?m.trace:_H2H_POLICY_BRANCH.trace;_H2H_POLICY_BRANCH.score=m.score||_H2H_POLICY_BRANCH.score;_h2hRenderPolicyExplorer();}
