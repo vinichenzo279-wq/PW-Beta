@@ -482,7 +482,7 @@
 <meta property="og:description" content="Pacwyn Solver">
 <!-- VERSION: bump this AND the matching v-number in the <h1><span> below on every patch, however
      small — see the longer note next to the <h1> for why this matters. -->
-<title>Pacwyn Solver v5.29.9</title>
+<title>Pacwyn Solver v5.29.10</title>
 <!-- ABOUT THIS APP / DATA SOURCE:
      This tool is for PACWYN, a game that heavily parallels EA FC but is NOT FC — it uses FC's
      real player cards as a base and adds its own exclusive cards on top. That's why FC data is a
@@ -2304,6 +2304,17 @@ details.hlp p{font-size:12px;color:var(--mut);margin:8px 0 0;line-height:1.55}
 .mg-ocr-axis-grid{grid-template-columns:repeat(4,minmax(115px,1fr))}
 @media(max-width:720px){.mg-ocr-axis-grid{grid-template-columns:repeat(2,minmax(120px,1fr))}}
 </style>
+
+<h3>Regression Note: Rating Budget Utilisation (85 Exact)</h3>
+<p>
+Do <b>not</b> assume that every legal squad should consume every available card-rating point.
+A documented benchmark used an exact-85 squad with <b>9×86 + 2×85</b> (Aaron 85 and Foyth 85).
+Although an exact-85 squad could legally use <b>10×86 + 1×85</b>, replacing Foyth with Marcos Llorente 86 and making the additional validity changes required to preserve the nation and club conditions produced a fully legal squad that performed worse in exact H2H.
+</p>
+<p>
+This benchmark demonstrates that under restrictive conditions (exact team rating, minimum nations, maximum club count, chemistry and manager boosts), a seemingly "unused" rating point can produce a stronger overall axis distribution. Future optimisation should maximise expected performance rather than nominal rating utilisation.
+</p>
+
 </body>, and updates section H's "WHERE TO FIND THEM"
        to point there instead of describing them as an external bundle. Still documentation only
        — nothing executes, no app logic/UI touched.
@@ -3914,6 +3925,17 @@ details.hlp p{font-size:12px;color:var(--mut);margin:8px 0 0;line-height:1.55}
 .mg-ocr-axis-grid{grid-template-columns:repeat(4,minmax(115px,1fr))}
 @media(max-width:720px){.mg-ocr-axis-grid{grid-template-columns:repeat(2,minmax(120px,1fr))}}
 </style>
+
+<h3>Regression Note: Rating Budget Utilisation (85 Exact)</h3>
+<p>
+Do <b>not</b> assume that every legal squad should consume every available card-rating point.
+A documented benchmark used an exact-85 squad with <b>9×86 + 2×85</b> (Aaron 85 and Foyth 85).
+Although an exact-85 squad could legally use <b>10×86 + 1×85</b>, replacing Foyth with Marcos Llorente 86 and making the additional validity changes required to preserve the nation and club conditions produced a fully legal squad that performed worse in exact H2H.
+</p>
+<p>
+This benchmark demonstrates that under restrictive conditions (exact team rating, minimum nations, maximum club count, chemistry and manager boosts), a seemingly "unused" rating point can produce a stronger overall axis distribution. Future optimisation should maximise expected performance rather than nominal rating utilisation.
+</p>
+
 </body>, inside an
           "APPENDIX: SOUNDNESS HARNESS SOURCE" comment block — extract each into its own file,
           all six in the same directory, to actually run the harness: fuzz_gen.js reads
@@ -7862,10 +7884,10 @@ own displayed rating. Raw probability, Classic, Modern and exact H2H remain unch
 <!-- v5.29.4 — IMPORT DB-STAT WARNING / DECISION-FRAGILITY REPORT. Imported squads now warn when saved ATK/BAL/DEF values differ from the current database and continue using current DB values only after confirmation. Practical opportunities are split into largest punishments and easy-to-miss traps, with fragility ranked by how few available choices preserve perfect play and by non-obvious same-immediate-result mistakes. -->
 <!-- v5.29.5 — EXPANDABLE PRACTICAL LINES / CONFIGURABLE LIST DEPTH. The non-perfect-play opportunity report is now collapsed by default, lets the user choose how many suggestions to display per category (1–40), and gives every suggestion an expandable full 11-round line from the mistake through optimal punishment and continuation. Worker output retains a bounded pool of practical deviations so larger reports remain responsive. -->
 <!-- v5.29.6 — VERSION-STAMP CORRECTION. Corrected the visible header/runtime version that was accidentally left at v5.29.3 through the v5.29.4-v5.29.5 patches, restored the missing v5.29.4 changelog entry, and kept title/header/changelog aligned. No solver logic changed. -->
-<!-- v5.29.9 — LA LIGA TARGET H2H / FIELD TOURNAMENT / +1-CAP FOLLOW-UP. Expanded the embedded 2026-07-26 benchmark with the exact target-specific and whole-field outcomes from the 26-finalist staged-outlier run: Del Bosque F3/F5 beat the stored Simeone target, while Simeone F1 lost that direct matchup but won the full home-and-away finalist tournament 46-4-0 for 142 points. Added the hard Team Rating +1 player-cap follow-up: Michels 4-1-2-1-2 F1 (75.263%) and its full XI beat the target 3-2 with six ties in both caller legs; F2 lost both legs and F4 managed only one draw. Documentation only; no solver, evaluator, database, tournament or H2H logic changed. -->
+<!-- v5.29.10 — LA LIGA TARGET H2H / FIELD TOURNAMENT / +1-CAP FOLLOW-UP. Expanded the embedded 2026-07-26 benchmark with the exact target-specific and whole-field outcomes from the 26-finalist staged-outlier run: Del Bosque F3/F5 beat the stored Simeone target, while Simeone F1 lost that direct matchup but won the full home-and-away finalist tournament 46-4-0 for 142 points. Added the hard Team Rating +1 player-cap follow-up: Michels 4-1-2-1-2 F1 (75.263%) and its full XI beat the target 3-2 with six ties in both caller legs; F2 lost both legs and F4 managed only one draw. Documentation only; no solver, evaluator, database, tournament or H2H logic changed. -->
 <!-- v5.29.8 — LA LIGA 85 SEARCH-COVERAGE BENCHMARK. Added the 2026-07-26 legal Exact-85 / Min-81 / LaLiga-11 / Max-3-club / Min-9-nations reference XI to the embedded future-maintainer regression notes. Records the Simeone +1 Atletico three-axis core, full XI display stats, the v5.29.7 Classic evaluation (72.675% win, 9.274% draw, 18.051% loss; 6.640 expected duel points), the ordinary winner's 61.475% contrast, and classifies the failure as search/generation coverage because the evaluator strongly values the XI once supplied. No solver, database, OCR or scoring logic changed. -->
 <!-- v5.29.7 — CREDITS / MARKET-BOUNDARY DOCUMENTATION. Added PW_Alextrat to the centred Special Thanks line and moved the creator/credits block into normal header flow so it wraps without overlapping other header content on narrow screens. Expanded the future-maintainer no-price-model section with two real peer-to-peer examples: rare duplicates used as trader identity signals, and a collection accidentally omitted from packs that became effectively unpackable for weeks; notes that such availability mistakes appear much rarer now. No solver, database, OCR or scoring logic changed. -->
-<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.29.9</span></h1>
+<h1 class="cap">&#11041; Pacwyn Solver <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v5.29.10</span></h1>
   <div class="cap sub">pacwyn optimiser</div>
   <div class="headerCredits">Created by <b style="color:var(--ink)">Chenzo</b><span class="thanks">Special thanks to BWFCPackfan, Pacyswaz and PW_Alextrat</span></div>
 </header>
@@ -27725,6 +27747,17 @@ setTimeout(()=>{try{_mgHiddenRender();_mgWordRender();}catch(e){}},0);
 .mg-suggestion-probe{color:var(--warn)}
 @media(max-width:620px){.mg-dual-suggestions{grid-template-columns:1fr}}
 </style>
+
+
+<h3>Regression Note: Rating Budget Utilisation (85 Exact)</h3>
+<p>
+Do <b>not</b> assume that every legal squad should consume every available card-rating point.
+A documented benchmark used an exact-85 squad with <b>9×86 + 2×85</b> (Aaron 85 and Foyth 85).
+Although an exact-85 squad could legally use <b>10×86 + 1×85</b>, replacing Foyth with Marcos Llorente 86 and making the additional validity changes required to preserve the nation and club conditions produced a fully legal squad that performed worse in exact H2H.
+</p>
+<p>
+This benchmark demonstrates that under restrictive conditions (exact team rating, minimum nations, maximum club count, chemistry and manager boosts), a seemingly "unused" rating point can produce a stronger overall axis distribution. Future optimisation should maximise expected performance rather than nominal rating utilisation.
+</p>
 
 </body>
 </html>
