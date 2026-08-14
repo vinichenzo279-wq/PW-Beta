@@ -429,7 +429,8 @@
 
       10. VERSION + CHANGELOG LAST.
           For a DB-only update, retain the latest three-part logic version and append/increment its
-          fourth DATA segment in both <title> and <h1><span> (for example v2.29.0 -> v2.29.0.1),
+          fourth DATA segment in both 
+<title> and <h1><span> (for example v2.29.0 -> v2.29.0.1),
           then add one short changelog entry as the final entry directly above <h1>. If the same
           release also changes app logic/UI behavior, use the appropriate normal three-part bump
           instead and omit the DATA segment. Do this only after embedding and validation pass.
@@ -1704,7 +1705,8 @@
 <!-- Previous D8r29 note: CONDITION-SHAPED PRESEARCH / OPEN SPECIALIST CLEANUP. Candidate eligibility remains layered: hard per-card bounds first, then squad-level rating-aware own ranking, then condition-derived squad-shape guidance, then manager/chemistry specialist coverage, with DFS condition checks retained as the correctness backstop. A new composable condition-shape prior ranks nation/league/club carrier cohorts by formation matchability and their ability to span active Different-league/nation/club lower bounds; Max-1 cohesion directly promotes the matching carrier axis. This prior reserves candidates only and never hard-filters the legal pool. Count requirements such as Min 3 TOTM still seed matching candidates directly, while manager achievable-core ranking remains condition-aware. Conditionless candidate assembly is also corrected end-to-end so specialist lanes cannot reintroduce low-rated relative-efficiency junk. No opponent probability, benchmark fitting or Draft production solve change. -->
 <!-- v7.0.0-D8r28 — OPEN-DOMAIN OWN-RANKING / PLAYER-BOUND FOUNDATION. Conditionless RTG own-side ordering now uses absolute axis strength because no team-rating budget exists to make relative OVR efficiency valuable. Known-rating regimes retain adequacy/efficiency ordering, so Cafu 74 remains valuable in Exact-83 when unrestricted. Player Rating Min/Max remain hard eligibility constraints applied before every candidate lane; e.g. Min 81 excludes Cafu before neutral/specialist reserves. No opponent probability or benchmark fitting is introduced. Draft remains frozen. -->
 <!-- v7.0.0-D8r27 — RTG NEUTRAL-FRONTIER / RATING-ADEQUACY FOUNDATION. Bounded RTG candidate lists now reserve a primary neutral own-side slice before manager/chemistry/rating specialist lanes can consume the cap. In a known team-rating regime, the neutral comparator first separates cards whose strongest post-explicit-manager axis is at/near the active rating benchmark, then ranks by own-card efficiency; equally efficient adequate cards prefer lower rating cost. This is own-side admission only: no opponent duel probability is consulted, low/sacrifice cards remain legal through later reserves/full-pool search, and no benchmark target is encoded. Draft production solve/holding/Cups logic is frozen. -->
-<title>Pacwyn Assistant v7.0.0-D8r108</title>
+<!-- v7.0.0-D8r111 — MOBILE STARTUP PIVOT RANKING V3 / VERSION SYNC. Formation calibration remains off at startup. Pivot startup remains simulation-free but replaces the D8r110 rating-first pseudo-core with a diversity-aware concrete 7-normal + Icon/Hero pseudo-XI scored under flat pivot chemistry. Startup ordering is strictly by the displayed estimate, with supply/depth only tie-breaking equal estimates. Product build version is synchronized in filename, <title> and visible H1; historical embedded revision comments remain unchanged as evidence. -->
+<title>Pacwyn Assistant v7.0.0-D8r111</title>
 <!-- ABOUT THIS APP / DATA SOURCE:
      This tool is for PACWYN, a game that heavily parallels EA FC but is NOT FC — it uses FC's
      real player cards as a base and adds its own exclusive cards on top. That's why FC data is a
@@ -10154,7 +10156,7 @@ END RTG/WL SEARCH MODEL CONCEPT NOTE -->
 <!-- v7.0.0-D8r6 — DORMANT BOUNDED-COVERAGE PROMOTION PROTOTYPE. The accepted cumulative chain is Q10+Classic-Brisk4 → Normal cap5 → deterministic Normal seed2 cap5 → Normal finalist-width8 cap8. Every stage challenges only the latest committed incumbent through the two-caller direct gate and immutable Q10+Classic-Brisk4 panel. Raw Deep, independent Modern-Brisk, seed3, and combined width8+seed2 failed their evidence gates; D8r6 source exploration is closed and seed4 is not pursued. The visible speed slider remains unchanged; this code is dormant pending top-end/near-exhaustive product mapping. -->
 <!-- v7.0.0-D8r5 — DORMANT NORMAL PROMOTION PROTOTYPE. Quick/Brisk stays Q10 + Classic-Brisk4. Normal adds only the validated Modern step-3 equal-7 source with finalPatchWeakRouteLimit=1, then uses incumbent-locked two-leg exact promotion plus the immutable lower-tier judge panel. Irrelevant higher-tier entrants cannot perturb the committed round-robin. Visible speed slider remains unchanged; Thorough remains evidence-only pending the all-field audit. -->
 <!-- v7.0.0-D8r2 — CORRECTED EXACT / SPEED-EVIDENCE CHECKPOINT. Added eight screenshot-confirmed Spotlight cards and synchronized the standalone/embedded DB. D8r cumulative speed work remains dormant and unexposed in the visible slider. Corrected D8r evidence boundary: an offline labelled-row axis-shift bug invalidated the old speed-retention matrices only; the live/browser H2H engine was unaffected. Seven corrected fields now bind dormant Q10 + Classic-Brisk4, while Q9+CB4 and Q10+CB3 each fail. Corrected Normal/Thorough append audits on the current three controls add no exact champion value. Visible slider remains unchanged. Draft distribution now carries a late-phase deferred hypothesis that PACWYN Draft uses a rating-band floor for pick distribution rather than a centre-weighted distribution; do not alter Draft until a later controlled audit because it is currently one of the most stable features. -->
-<h1 class="cap">&#11041; Pacwyn Assistant <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v7.0.0-D8r103</span></h1>
+<h1 class="cap">&#11041; Pacwyn Assistant <span style="font-size:11px;opacity:.65;font-weight:500;letter-spacing:0">v7.0.0-D8r111</span></h1>
   <div class="cap sub">pacwyn optimiser</div>
   <div class="headerCredits">Created by <b style="color:var(--ink)">Chenzo</b><span class="thanks">Special thanks to BWFCPackfan, Pacyswaz and PW_Alextrat</span></div>
 </header>
@@ -21427,47 +21429,40 @@ function _dbRestore(){try{const raw=sessionStorage.getItem(_DB_KEY)||localStorag
 // Manual full DB analysis and the 40-Draft Typical / Best-10 measurement remain explicit actions.
 var _PIVOT_AUTO_TIMER=null;
 function _cheapPivotStartupResults(){
-  // D8r110 mobile-startup v2: deliberately O(DB + small per-pivot sorts), with ZERO formation
-  // matching, Draft generation or DFS. Each Normal contributes to exactly one league bucket and one
-  // nation bucket. We keep only the best print per real person, take a rating-first pseudo core, and
-  // add tiny supply/diversity tie-breaks. This is an initial ORDERING estimate, not measured Typical.
-  const src=_solverEligibleCards(playerDB.length?playerDB:DEFAULT_DB),groupsLg=new Map(),groupsNat=new Map(),specialPeople=new Map();
+  // D8r111 mobile-startup v3: cheap *buildable-core* estimate. Still ZERO formation matching,
+  // Draft generation, Monte Carlo or DFS. The D8r110 top-7-rating proxy badly mis-ranked pivots
+  // because it ignored the same complementary nation/club/league diversity that gives a pivot its
+  // score. This pass keeps best print per person, constructs one diversity-aware 7-normal core,
+  // adds the strongest legal Icon/Hero mix, and scores that concrete pseudo-XI. Supply is a TIEBREAK
+  // only: the displayed startup estimate is now monotonic with the displayed ordering.
+  const src=_solverEligibleCards(playerDB.length?playerDB:DEFAULT_DB),groupsLg=new Map(),groupsNat=new Map(),icons=new Map(),heroes=new Map();
   const W=c=>(typeof c.copies==='number'&&c.copies>0)?c.copies:1;
   const pk=c=>typeof _pivotPersonKey==='function'?_pivotPersonKey(c):String((c&&c.name)||'').trim().toLowerCase()+'|'+String(c&&c.pidx!=null?c.pidx:'');
-  const add=(map,key,c)=>{if(!key)return;let g=map.get(key);if(!g){g={people:new Map(),w:0};map.set(key,g);}g.w+=W(c);const id=pk(c),old=g.people.get(id);if(!old||Number(c.rating||0)>Number(old.rating||0))g.people.set(id,c);};
-  for(const c of src){
-    if(!c)continue;
-    if(c.type==='normal'){add(groupsLg,leagueOf(c),c);add(groupsNat,c.nation||'',c);}
-    else if(c.type==='icon'||c.type==='hero'){const id=pk(c),old=specialPeople.get(id);if(!old||Number(c.rating||0)>Number(old.rating||0))specialPeople.set(id,c);}
-  }
+  const bestPut=(m,c)=>{const id=pk(c),old=m.get(id);if(!old||Number(c.rating||0)>Number(old.rating||0))m.set(id,c);};
+  const add=(map,key,c)=>{if(!key)return;let g=map.get(key);if(!g){g={people:new Map(),w:0};map.set(key,g);}g.w+=W(c);bestPut(g.people,c);};
+  for(const c of src){if(!c)continue;if(c.type==='normal'){add(groupsLg,leagueOf(c),c);add(groupsNat,c.nation||'',c);}else if(c.type==='icon')bestPut(icons,c);else if(c.type==='hero')bestPut(heroes,c);}
+  const byRating=(a,b)=>Number(b.rating||0)-Number(a.rating||0);
+  const iconsSorted=Array.from(icons.values()).sort(byRating),heroesSorted=Array.from(heroes.values()).sort(byRating);
   let caps={maxIconsXI:1,maxHeroesXI:3,maxSpecialsXI:4};try{caps=_calMixSanitize(CAL_MIX_CFG);}catch(e){}
-  const specials=Array.from(specialPeople.values()).sort((a,b)=>Number(b.rating||0)-Number(a.rating||0));
-  const globalSpecials=[];let ni=0,nh=0;
-  for(const c of specials){if(globalSpecials.length>=Number(caps.maxSpecialsXI||0))break;const isI=c.type==='icon',isH=c.type==='hero';if(isI&&ni>=Number(caps.maxIconsXI||0))continue;if(isH&&nh>=Number(caps.maxHeroesXI||0))continue;globalSpecials.push(c);if(isI)ni++;if(isH)nh++;}
-  function one(kind,key,g){
-    const normals=Array.from(g.people.values()).sort((a,b)=>Number(b.rating||0)-Number(a.rating||0));
-    if(normals.length<7)return null;
-    const picked=normals.slice(0,7),used=new Set(picked.map(pk));
-    for(const c of globalSpecials){if(picked.length>=11)break;if(!used.has(pk(c))){picked.push(c);used.add(pk(c));}}
-    for(let i=7;i<normals.length&&picked.length<11;i++){const c=normals[i];if(!used.has(pk(c))){picked.push(c);used.add(pk(c));}}
-    if(picked.length<11)return null;
-    const ratings=picked.map(c=>Number(c.rating||0));
-    const rating=typeof futRatingRaw==='function'?Math.floor(futRatingRaw(ratings)):Math.round(ratings.reduce((a,b)=>a+b,0)/11);
-    const nations=new Set(picked.map(c=>c.nation||'').filter(Boolean)).size,leagues=new Set(picked.map(c=>leagueOf(c)).filter(Boolean)).size,clubs=new Set(picked.map(c=>c.club||'').filter(Boolean)).size;
-    const estimate=rating+33+nations+leagues+clubs+2;
-    // Potential diversity is only a light tiebreak. Do not run a greedy construction just to rank startup.
-    const compA=new Set(normals.map(c=>kind==='nation'?leagueOf(c):(c.nation||'')).filter(Boolean)).size;
-    const compClub=new Set(normals.map(c=>c.club||'').filter(Boolean)).size;
-    const supplyTie=Math.min(1.25,Math.log2(1+g.w)/12),depthTie=Math.min(0.75,Math.log2(1+normals.length)/14),divTie=0.04*Math.min(12,compA)+0.025*Math.min(12,compClub);
-    // Nation pivots must manufacture league diversity across their Normal core; league pivots get
-    // nation diversity much more cheaply. A small startup-only penalty keeps the heuristic from
-    // overrating huge nations merely because their best seven cards are strong. Real measurements
-    // replace this heuristic whenever available.
-    const nationStructurePenalty=kind==='nation'?2.5:0;
-    return {kind,key,buildable:estimate,ceiling:estimate,likelyScore:estimate,identityCount:normals.length,reliability:g.w,unreliable:false,startupEstimate:true,_startupRank:estimate+supplyTie+depthTie+divTie-nationStructurePenalty};
+  function build(kind,key,g){
+    const pool=Array.from(g.people.values()).sort(byRating);if(pool.length<7)return null;
+    const chosen=[],used=new Set(),natSeen=new Set(),clubSeen=new Set(),lgSeen=new Set();
+    const take=c=>{chosen.push(c);used.add(pk(c));if(c.nation)natSeen.add(c.nation);const lg=leagueOf(c);if(lg)lgSeen.add(lg);if(c.type==='normal'&&c.club)clubSeen.add(c.club);};
+    const newClub=c=>!c.club||!clubSeen.has(c.club);
+    const fresh2=c=>kind==='league'?(!natSeen.has(c.nation)&&newClub(c)):(!lgSeen.has(leagueOf(c))&&newClub(c));
+    const fresh1=c=>kind==='league'?(!natSeen.has(c.nation)||newClub(c)):(!lgSeen.has(leagueOf(c))||newClub(c));
+    const pickNormal=()=>pool.find(c=>!used.has(pk(c))&&fresh2(c))||pool.find(c=>!used.has(pk(c))&&fresh1(c))||pool.find(c=>!used.has(pk(c)));
+    while(chosen.length<7){const c=pickNormal();if(!c)break;take(c);}if(chosen.length<7)return null;
+    let ni=0,nh=0;
+    if(Number(caps.maxIconsXI||0)>0&&Number(caps.maxSpecialsXI||0)>0){const c=iconsSorted.find(x=>!used.has(pk(x))&&!natSeen.has(x.nation))||iconsSorted.find(x=>!used.has(pk(x)));if(c){take(c);ni++;}}
+    const heroMax=Math.min(Number(caps.maxHeroesXI||0),Number(caps.maxSpecialsXI||0)-ni);
+    while(nh<heroMax&&chosen.length<11){const c=heroesSorted.find(x=>!used.has(pk(x))&&(!lgSeen.has(leagueOf(x))||!natSeen.has(x.nation)))||heroesSorted.find(x=>!used.has(pk(x)));if(!c)break;take(c);nh++;}
+    while(chosen.length<11){const c=pickNormal();if(!c)break;take(c);}if(chosen.length<11)return null;
+    const raw=scoreXI(chosen),estimate=Number(raw.rating||0)+33+Number(raw.nations||0)+Number(raw.leagues||0)+Number(raw.clubs||0)+2;
+    return {kind,key,buildable:estimate,ceiling:estimate,likelyScore:estimate,identityCount:pool.length,reliability:g.w,unreliable:false,startupEstimate:true,_startupRank:estimate,_startupDetail:{rating:raw.rating,nations:raw.nations,leagues:raw.leagues,clubs:raw.clubs}};
   }
-  const out=[];for(const [k,g] of groupsLg){if(norm(k)==='others')continue;const r=one('league',k,g);if(r)out.push(r);}for(const [k,g] of groupsNat){const r=one('nation',k,g);if(r)out.push(r);}
-  out.sort((a,b)=>Number(b._startupRank||0)-Number(a._startupRank||0)||Number(b.buildable||0)-Number(a.buildable||0)||Number(b.identityCount||0)-Number(a.identityCount||0)||String(a.key).localeCompare(String(b.key)));
+  const out=[];for(const [k,g] of groupsLg){if(norm(k)==='others')continue;const r=build('league',k,g);if(r)out.push(r);}for(const [k,g] of groupsNat){const r=build('nation',k,g);if(r)out.push(r);}
+  out.sort((a,b)=>Number(b.buildable||0)-Number(a.buildable||0)||Number(b.reliability||0)-Number(a.reliability||0)||Number(b.identityCount||0)-Number(a.identityCount||0)||String(a.key).localeCompare(String(b.key)));
   return out;
 }
 function runPivotAnalysisStartupCheap(){
@@ -21479,7 +21474,7 @@ function runPivotAnalysisStartupCheap(){
   const measured=_pivMeasureCompatible(PIVOT_MEASURE),K=getPivotTopK(),ms=Math.max(1,Math.round(performance.now()-t0));
   const row=(r,i)=>{const m=_pivMeasureGet(r),hi=m&&Number.isFinite(m.highObserved)?{value:m.highObserved,observed:true}:{value:r.buildable,observed:false},label=hi.observed?'High observed':'startup est.';return '<div style="margin:7px 0;padding-bottom:6px;border-bottom:1px solid var(--line)"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span><b>'+(i+1)+'.</b> '+(r.kind==='nation'?'🌐 nation ':'')+esc(r.key)+'</span><span style="white-space:nowrap"><b style="font-size:15px">'+_pivMeasureNum(hi.value)+'</b> <span class="tiny" style="color:var(--mut)">'+label+'</span></span></div><div class="tiny" style="color:var(--mut);margin-top:3px;display:flex;flex-wrap:wrap;gap:2px 12px;align-items:center">'+(measured?_pivMeasureRowHtml(r):'<span>Fast startup estimate · no Draft sims run</span>')+'<span>'+Number(r.identityCount||0).toLocaleString()+' unique pivot players · '+Number(r.reliability||0).toLocaleString()+' supply</span><button class="btn gho sm" style="padding:1px 8px;font-size:10px;margin-left:auto" onclick="setHelperPivot(\''+r.kind+'\',\''+String(r.key).replace(/'/g,"\\'")+'\')">use as pivot</button></div></div>';};
   const top=res.slice(0,K).map(row).join(''),rest=res.slice(K),restHtml=rest.length?'<details style="margin-top:8px"><summary class="tiny" style="color:var(--mut);cursor:pointer">'+rest.length+' more outside the top '+K+'</summary><div style="margin-top:4px;opacity:.75">'+rest.map((r,i)=>row(r,K+i)).join('')+'</div></details>':'';
-  box.innerHTML='<div class="tiny" style="color:var(--mut);margin-bottom:5px"><b>Fast startup ranking:</b> no formation simulation and no per-pivot Draft DFS ran. '+(measured?'Compatible saved Typical / Best 10/40 data was reused for ordering.':'Press <b>Calculate 40 drafts per pivot</b> when you want measured Typical / Best 10/40; <b>Run full DB pivot analyzer</b> is the heavier non-simulation fallback.')+' · pivot: <b id="pivotCurrent">'+(PIVOT_KIND==='nation'?'🌐 ':'')+esc(PIVOT_KEY)+'</b> · '+ms+' ms</div>'+top+restHtml;
+  box.innerHTML='<div class="tiny" style="color:var(--mut);margin-bottom:5px"><b>Fast startup ranking:</b> cheap diversity-aware pseudo-XI only; no formation simulation, Draft board, Monte Carlo or DFS ran. '+(measured?'Compatible saved Typical / Best 10/40 data was reused for ordering.':'Press <b>Calculate 40 drafts per pivot</b> when you want measured Typical / Best 10/40; <b>Run full DB pivot analyzer</b> is the heavier non-simulation fallback.')+' · pivot: <b id="pivotCurrent">'+(PIVOT_KIND==='nation'?'🌐 ':'')+esc(PIVOT_KEY)+'</b> · '+ms+' ms</div>'+top+restHtml;
   if(typeof _renderPivotWarn==='function')_renderPivotWarn();_pivAnalyzed=true;_pivAnalyzedDbHash=_pivDbHash(_pivDbSource());_renderPivotDbFreshness();
 }
 function _schedulePivotAnalysisOnLoad(){const box=$('#pivotResult');if(box)box.innerHTML='<span class="tiny" style="color:var(--mut)">⚡ Building lightweight startup pivot ranking&hellip;</span>';_PIVOT_AUTO_TIMER=setTimeout(function(){_PIVOT_AUTO_TIMER=null;try{runPivotAnalysisStartupCheap();}catch(e){}},300);}
